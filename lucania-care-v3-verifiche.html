@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucania-Care v3.0 - Verifiche Trimestrali PEI</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb; --primary-dark: #1d4ed8; --primary-light: #dbeafe;
+            --success: #10b981; --success-light: #d1fae5;
+            --warning: #f59e0b; --warning-light: #fef3c7;
+            --danger: #ef4444; --danger-light: #fee2e2;
+            --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+            --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280;
+            --gray-600: #4b5563; --gray-700: #374151; --gray-800: #1f2937; --gray-900: #111827;
+            --purple: #8b5cf6; --purple-light: #ede9fe;
+            --cyan: #06b6d4; --cyan-light: #cffafe;
+            --teal: #14b8a6; --teal-light: #ccfbf1;
+            --orange: #f97316; --orange-light: #fed7aa;
+            --pink: #ec4899; --pink-light: #fce7f3;
+            --indigo: #6366f1; --indigo-light: #e0e7ff;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--gray-50); color: var(--gray-800); }
+        .app-container { display: flex; min-height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar { width: 260px; background: linear-gradient(180deg, var(--gray-900) 0%, var(--gray-800) 100%); color: white; padding: 16px 0; position: fixed; height: 100vh; overflow-y: auto; z-index: 100; }
+        .sidebar-header { padding: 0 16px 16px; border-bottom: 1px solid var(--gray-700); margin-bottom: 16px; }
+        .sidebar-logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary) 0%, var(--cyan) 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+        .logo-text h1 { font-size: 16px; font-weight: 700; color: white; }
+        .logo-text span { font-size: 10px; color: var(--gray-400); }
+        .nav-section { margin-bottom: 20px; }
+        .nav-section-title { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--gray-500); padding: 0 16px; margin-bottom: 6px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: var(--gray-400); cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; font-size: 13px; text-decoration: none; }
+        .nav-item:hover { background: var(--gray-700); color: white; }
+        .nav-item.active { background: rgba(37, 99, 235, 0.15); color: var(--primary); border-left-color: var(--primary); }
+        .nav-item svg { width: 18px; height: 18px; }
+        .nav-external { font-size: 9px; color: var(--gray-500); margin-left: auto; }
+        
+        /* Main */
+        .main-content { flex: 1; margin-left: 260px; min-height: 100vh; }
+        .header { background: white; padding: 14px 24px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+        .header-title { display: flex; align-items: center; gap: 16px; }
+        .header-title h2 { font-size: 18px; font-weight: 600; color: var(--gray-900); }
+        .header-title p { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+        .back-btn { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: var(--gray-100); border: none; border-radius: 8px; color: var(--gray-600); font-size: 13px; cursor: pointer; text-decoration: none; }
+        .back-btn:hover { background: var(--gray-200); }
+        .header-actions { display: flex; align-items: center; gap: 10px; }
+        .content { padding: 20px 24px; max-width: 1600px; }
+        
+        /* Cards */
+        .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 16px; overflow: hidden; }
+        .card-header { padding: 14px 16px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: space-between; }
+        .card-header h3 { font-size: 14px; font-weight: 600; color: var(--gray-800); display: flex; align-items: center; gap: 8px; }
+        .card-body { padding: 20px; }
+        
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 20px; }
+        .stat-card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid var(--primary); }
+        .stat-card.success { border-left-color: var(--success); }
+        .stat-card.warning { border-left-color: var(--warning); }
+        .stat-card.danger { border-left-color: var(--danger); }
+        .stat-card.purple { border-left-color: var(--purple); }
+        .stat-card.cyan { border-left-color: var(--cyan); }
+        .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 10px; }
+        .stat-icon.primary { background: var(--primary-light); color: var(--primary); }
+        .stat-icon.success { background: var(--success-light); color: var(--success); }
+        .stat-icon.warning { background: var(--warning-light); color: var(--warning); }
+        .stat-icon.danger { background: var(--danger-light); color: var(--danger); }
+        .stat-icon.purple { background: var(--purple-light); color: var(--purple); }
+        .stat-icon.cyan { background: var(--cyan-light); color: var(--cyan); }
+        .stat-value { font-size: 24px; font-weight: 700; color: var(--gray-900); }
+        .stat-label { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+        
+        /* Form */
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-600); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 14px; color: var(--gray-800); background: white; transition: all 0.2s; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+        .form-textarea { min-height: 80px; resize: vertical; }
+        .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .form-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .form-row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 500; border: none; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: var(--gray-100); color: var(--gray-700); }
+        .btn-secondary:hover { background: var(--gray-200); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--gray-300); color: var(--gray-700); }
+        .btn-outline:hover { background: var(--gray-50); border-color: var(--gray-400); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .btn-lg { padding: 12px 24px; font-size: 15px; }
+        
+        /* Badge */
+        .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+        .badge-primary { background: var(--primary-light); color: var(--primary); }
+        .badge-success { background: var(--success-light); color: var(--success); }
+        .badge-warning { background: var(--warning-light); color: var(--warning); }
+        .badge-danger { background: var(--danger-light); color: var(--danger); }
+        .badge-purple { background: var(--purple-light); color: var(--purple); }
+        .badge-cyan { background: var(--cyan-light); color: var(--cyan); }
+        .badge-gray { background: var(--gray-100); color: var(--gray-600); }
+        
+        /* Patient Header */
+        .patient-header { background: linear-gradient(135deg, var(--purple) 0%, var(--indigo) 100%); color: white; padding: 20px 24px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px; }
+        .patient-avatar { width: 60px; height: 60px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; }
+        .patient-info h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+        .patient-info p { font-size: 13px; opacity: 0.9; }
+        .patient-badges { display: flex; gap: 8px; margin-top: 8px; }
+        .patient-badges .badge { background: rgba(255,255,255,0.2); color: white; }
+        
+        /* Trimestre Tabs */
+        .trimestre-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+        .trimestre-tab { flex: 1; padding: 16px 20px; background: white; border-radius: 12px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .trimestre-tab:hover { border-color: var(--primary-light); }
+        .trimestre-tab.active { border-color: var(--primary); background: var(--primary-light); }
+        .trimestre-tab.completed { border-color: var(--success); }
+        .trimestre-tab.completed .tab-status { color: var(--success); }
+        .trimestre-tab.pending { border-color: var(--warning); }
+        .trimestre-tab.pending .tab-status { color: var(--warning); }
+        .trimestre-tab.overdue { border-color: var(--danger); }
+        .trimestre-tab.overdue .tab-status { color: var(--danger); }
+        .tab-label { font-size: 14px; font-weight: 600; color: var(--gray-800); margin-bottom: 4px; }
+        .tab-date { font-size: 11px; color: var(--gray-500); }
+        .tab-status { font-size: 11px; font-weight: 600; margin-top: 6px; }
+        
+        /* Verifica Form */
+        .verifica-section { margin-bottom: 24px; }
+        .section-title { font-size: 15px; font-weight: 600; color: var(--gray-800); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 2px solid var(--gray-100); }
+        .section-title .icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .section-title .icon.primary { background: var(--primary-light); }
+        .section-title .icon.success { background: var(--success-light); }
+        .section-title .icon.warning { background: var(--warning-light); }
+        .section-title .icon.purple { background: var(--purple-light); }
+        
+        /* Area Grid */
+        .area-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+        .area-item { background: var(--gray-50); border-radius: 10px; padding: 14px; border: 1px solid var(--gray-200); transition: all 0.2s; }
+        .area-item:hover { border-color: var(--primary); }
+        .area-item.highlight { background: var(--primary-light); border-color: var(--primary); }
+        .area-number { font-size: 10px; color: var(--gray-500); font-weight: 600; margin-bottom: 4px; }
+        .area-name { font-size: 12px; font-weight: 500; color: var(--gray-700); margin-bottom: 8px; min-height: 32px; }
+        .area-input { width: 100%; padding: 10px; border: 2px solid var(--gray-200); border-radius: 8px; font-size: 18px; font-weight: 700; text-align: center; background: white; }
+        .area-input:focus { outline: none; border-color: var(--primary); }
+        .area-input.val-1 { background: var(--danger-light); border-color: var(--danger); color: var(--danger); }
+        .area-input.val-2 { background: var(--orange-light); border-color: var(--orange); color: var(--orange); }
+        .area-input.val-3 { background: var(--warning-light); border-color: var(--warning); color: var(--warning); }
+        .area-input.val-4 { background: var(--cyan-light); border-color: var(--cyan); color: var(--cyan); }
+        .area-input.val-5 { background: var(--success-light); border-color: var(--success); color: var(--success); }
+        .area-input.val-6 { background: var(--gray-100); border-color: var(--gray-400); color: var(--gray-500); }
+        
+        /* Legenda */
+        .legenda { display: flex; gap: 12px; flex-wrap: wrap; padding: 14px 18px; background: var(--gray-50); border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--gray-200); }
+        .legenda-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--gray-600); }
+        .legenda-dot { width: 20px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 10px; color: white; }
+        .legenda-dot.v1 { background: var(--danger); }
+        .legenda-dot.v2 { background: var(--orange); }
+        .legenda-dot.v3 { background: var(--warning); }
+        .legenda-dot.v4 { background: var(--cyan); }
+        .legenda-dot.v5 { background: var(--success); }
+        .legenda-dot.v6 { background: var(--gray-400); }
+        
+        /* CGI Section */
+        .cgi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .cgi-card { background: var(--gray-50); border-radius: 12px; padding: 20px; border: 1px solid var(--gray-200); }
+        .cgi-title { font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 12px; }
+        .cgi-options { display: flex; flex-direction: column; gap: 8px; }
+        .cgi-option { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: white; border-radius: 8px; cursor: pointer; border: 2px solid var(--gray-200); transition: all 0.2s; }
+        .cgi-option:hover { border-color: var(--primary-light); }
+        .cgi-option.selected { border-color: var(--primary); background: var(--primary-light); }
+        .cgi-option input { display: none; }
+        .cgi-value { width: 28px; height: 28px; border-radius: 6px; background: var(--gray-200); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: var(--gray-600); }
+        .cgi-option.selected .cgi-value { background: var(--primary); color: white; }
+        .cgi-label { font-size: 13px; color: var(--gray-700); }
+        
+        /* Firme Section */
+        .firme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .firma-card { background: var(--gray-50); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--gray-200); }
+        .firma-role { font-size: 11px; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .firma-name { font-size: 14px; font-weight: 600; color: var(--gray-800); margin-bottom: 12px; }
+        .firma-line { border-bottom: 2px dotted var(--gray-300); margin: 20px 0; }
+        .firma-date { font-size: 12px; color: var(--gray-500); }
+        
+        /* Storico Table */
+        .storico-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .storico-table th, .storico-table td { padding: 12px; text-align: center; border-bottom: 1px solid var(--gray-100); }
+        .storico-table th { background: var(--gray-50); font-weight: 600; color: var(--gray-600); font-size: 11px; text-transform: uppercase; }
+        .storico-table .area-col { text-align: left; font-weight: 500; }
+        .storico-table .val { width: 50px; height: 30px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; }
+        .storico-table .val-1 { background: var(--danger-light); color: var(--danger); }
+        .storico-table .val-2 { background: var(--orange-light); color: var(--orange); }
+        .storico-table .val-3 { background: var(--warning-light); color: var(--warning); }
+        .storico-table .val-4 { background: var(--cyan-light); color: var(--cyan); }
+        .storico-table .val-5 { background: var(--success-light); color: var(--success); }
+        .storico-table .trend-up { color: var(--success); font-size: 16px; }
+        .storico-table .trend-down { color: var(--danger); font-size: 16px; }
+        .storico-table .trend-stable { color: var(--gray-400); font-size: 16px; }
+        
+        /* Note Section */
+        .note-box { background: var(--warning-light); border: 1px solid var(--warning); border-radius: 10px; padding: 16px; margin-bottom: 20px; }
+        .note-title { font-size: 13px; font-weight: 600; color: var(--warning); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .note-text { font-size: 13px; color: var(--gray-700); line-height: 1.5; }
+        
+        /* Footer */
+        .footer-actions { position: sticky; bottom: 0; background: white; padding: 16px 24px; border-top: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; margin: 20px -24px -20px; box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.1); }
+        .footer-info { font-size: 12px; color: var(--gray-500); display: flex; align-items: center; gap: 8px; }
+        .footer-buttons { display: flex; gap: 10px; }
+        
+        /* Toast */
+        .toast { position: fixed; bottom: 24px; right: 24px; background: var(--gray-900); color: white; padding: 14px 20px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1000; animation: slideIn 0.3s ease-out; }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        
+        /* Print */
+        .print-header { display: none; }
+        @media print {
+            .sidebar, .header, .footer-actions, .btn { display: none !important; }
+            .main-content { margin-left: 0 !important; }
+            .print-header { display: block; text-align: center; margin-bottom: 20px; }
+            .card { box-shadow: none; border: 1px solid var(--gray-200); }
+        }
+        
+        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } .area-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; } .stats-grid, .area-grid { grid-template-columns: repeat(2, 1fr); } .cgi-grid, .firme-grid { grid-template-columns: 1fr; } .trimestre-tabs { flex-wrap: wrap; } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Icons
+        const Icons = {
+            ArrowLeft: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>,
+            Save: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>,
+            Calendar: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+            Check: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>,
+            Clock: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+            AlertTriangle: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+            FileText: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+            Home: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+            Users: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>,
+            Printer: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>,
+            Download: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+            TrendingUp: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
+            BarChart: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>,
+            ExternalLink: () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+            Pill: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>,
+            Activity: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+        };
+
+        // Mock Data
+        const mockPatient = {
+            id: 1, nome: 'Teresa', cognome: 'Basile', cf: 'GMBNTL83C46G793S',
+            diagnosi: 'Disturbo di conversione con ritardo mentale', struttura: 'Casa Alloggio',
+            dataIns: '12/04/2021', anno: 2025
+        };
+
+        const areeIntervento = [
+            { id: 1, nome: 'Cura di sé' },
+            { id: 2, nome: 'Cura ambiente di vita' },
+            { id: 3, nome: 'Compliance terapia' },
+            { id: 4, nome: 'Capacità emergenza' },
+            { id: 5, nome: 'Rapporti familiari' },
+            { id: 6, nome: 'Controllo impulsi' },
+            { id: 7, nome: 'Gestione denaro' },
+            { id: 8, nome: 'Lavoro' },
+            { id: 9, nome: 'Relazioni sociali' },
+            { id: 10, nome: 'Tempo libero' },
+            { id: 11, nome: 'Capacità espressive' },
+            { id: 12, nome: 'Uso mezzi/servizi' },
+        ];
+
+        const mockVerifiche = {
+            Q1: { data: '15/03/2025', stato: 'completata', valori: [3, 3, 4, 3, 4, 3, 2, 2, 3, 3, 3, 2], cgi: 4, miglioramento: 3 },
+            Q2: { data: '15/06/2025', stato: 'completata', valori: [3, 4, 4, 3, 4, 3, 3, 2, 4, 3, 3, 3], cgi: 3, miglioramento: 2 },
+            Q3: { data: '15/09/2025', stato: 'completata', valori: [4, 4, 4, 4, 4, 4, 3, 3, 4, 4, 4, 3], cgi: 3, miglioramento: 2 },
+            Q4: { data: '15/12/2025', stato: 'in_scadenza', valori: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], cgi: null, miglioramento: null },
+        };
+
+        // Main App
+        const VerificheApp = () => {
+            const [activeTrimestre, setActiveTrimestre] = useState('Q4');
+            const [verifiche, setVerifiche] = useState(mockVerifiche);
+            const [showToast, setShowToast] = useState(false);
+            const [toastMessage, setToastMessage] = useState('');
+
+            const trimestri = [
+                { id: 'Q1', label: 'I° Trimestre', periodo: 'Gen - Mar 2025' },
+                { id: 'Q2', label: 'II° Trimestre', periodo: 'Apr - Giu 2025' },
+                { id: 'Q3', label: 'III° Trimestre', periodo: 'Lug - Set 2025' },
+                { id: 'Q4', label: 'IV° Trimestre', periodo: 'Ott - Dic 2025' },
+            ];
+
+            const getTrimestreStatus = (id) => {
+                const v = verifiche[id];
+                if (v.stato === 'completata') return 'completed';
+                if (v.stato === 'in_scadenza') return 'pending';
+                if (v.stato === 'scaduta') return 'overdue';
+                return '';
+            };
+
+            const getStatusLabel = (stato) => {
+                switch (stato) {
+                    case 'completata': return '✓ Completata';
+                    case 'in_scadenza': return '⏰ In scadenza';
+                    case 'scaduta': return '⚠ Scaduta';
+                    default: return 'Da compilare';
+                }
+            };
+
+            const updateAreaValue = (areaIndex, value) => {
+                const newVerifiche = { ...verifiche };
+                newVerifiche[activeTrimestre].valori[areaIndex] = parseInt(value) || 0;
+                setVerifiche(newVerifiche);
+            };
+
+            const updateCGI = (field, value) => {
+                const newVerifiche = { ...verifiche };
+                newVerifiche[activeTrimestre][field] = value;
+                setVerifiche(newVerifiche);
+            };
+
+            const handleSave = () => {
+                const newVerifiche = { ...verifiche };
+                newVerifiche[activeTrimestre].stato = 'completata';
+                newVerifiche[activeTrimestre].data = new Date().toLocaleDateString('it-IT');
+                setVerifiche(newVerifiche);
+                setToastMessage('✓ Verifica trimestrale salvata con successo!');
+                setShowToast(true);
+                setTimeout(() => setShowToast(false), 3000);
+            };
+
+            const calcStats = () => {
+                const completed = Object.values(verifiche).filter(v => v.stato === 'completata').length;
+                const pending = Object.values(verifiche).filter(v => v.stato === 'in_scadenza').length;
+                const overdue = Object.values(verifiche).filter(v => v.stato === 'scaduta').length;
+                
+                // Calcola media ultimo trimestre completato
+                const lastCompleted = ['Q3', 'Q2', 'Q1'].find(q => verifiche[q].stato === 'completata');
+                const avgScore = lastCompleted 
+                    ? (verifiche[lastCompleted].valori.reduce((a, b) => a + b, 0) / 12).toFixed(1)
+                    : '-';
+                
+                return { completed, pending, overdue, avgScore };
+            };
+
+            const stats = calcStats();
+            const currentVerifica = verifiche[activeTrimestre];
+
+            return (
+                <div className="app-container">
+                    {/* Sidebar */}
+                    <aside className="sidebar">
+                        <div className="sidebar-header">
+                            <div className="sidebar-logo">
+                                <div className="logo-icon">LC</div>
+                                <div className="logo-text">
+                                    <h1>Lucania-Care</h1>
+                                    <span>BenEssere Cooperativa v3.0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <nav>
+                            <div className="nav-section">
+                                <div className="nav-section-title">Navigazione</div>
+                                <a href="lucania-care-v3-main.html" className="nav-item"><Icons.Home /><span>Dashboard</span></a>
+                                <a href="lucania-care-v3-main.html" className="nav-item"><Icons.Users /><span>Anagrafica</span></a>
+                                <a href="lucania-care-v3-main.html" className="nav-item"><Icons.FileText /><span>Gestione PEI</span></a>
+                                <a href="#" className="nav-item active"><Icons.Calendar /><span>Verifiche Trimestrali</span></a>
+                            </div>
+                            <div className="nav-section">
+                                <div className="nav-section-title">Moduli</div>
+                                <a href="lucania-care-v3-pei-editor.html" className="nav-item"><Icons.FileText /><span>Editor PEI</span><span className="nav-external"><Icons.ExternalLink /></span></a>
+                                <a href="lucania-care-v3-clinical.html" className="nav-item"><Icons.Pill /><span>Farmaci</span><span className="nav-external"><Icons.ExternalLink /></span></a>
+                            </div>
+                        </nav>
+                    </aside>
+
+                    {/* Main Content */}
+                    <main className="main-content">
+                        <header className="header">
+                            <div className="header-title">
+                                <a href="lucania-care-v3-main.html" className="back-btn">
+                                    <Icons.ArrowLeft /> Torna a Gestione PEI
+                                </a>
+                                <div>
+                                    <h2>Verifiche Trimestrali PEI</h2>
+                                    <p>Monitoraggio periodico obiettivi - Anno {mockPatient.anno}</p>
+                                </div>
+                            </div>
+                            <div className="header-actions">
+                                <button className="btn btn-outline" onClick={() => window.print()}><Icons.Printer /> Stampa</button>
+                                <button className="btn btn-outline"><Icons.Download /> Esporta PDF</button>
+                                <button className="btn btn-success btn-lg" onClick={handleSave}><Icons.Save /> Salva Verifica</button>
+                            </div>
+                        </header>
+
+                        <div className="content fade-in">
+                            {/* Print Header */}
+                            <div className="print-header">
+                                <h1>BenEssere Cooperativa Sociale</h1>
+                                <h2>Verifica Trimestrale PEI - {mockPatient.cognome} {mockPatient.nome}</h2>
+                                <p>Anno {mockPatient.anno}</p>
+                            </div>
+
+                            {/* Patient Header */}
+                            <div className="patient-header">
+                                <div className="patient-avatar">BT</div>
+                                <div className="patient-info">
+                                    <h2>{mockPatient.cognome} {mockPatient.nome}</h2>
+                                    <p>{mockPatient.diagnosi}</p>
+                                    <div className="patient-badges">
+                                        <span className="badge">{mockPatient.struttura}</span>
+                                        <span className="badge">Anno PEI: {mockPatient.anno}</span>
+                                        <span className="badge">Inserimento: {mockPatient.dataIns}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Stats */}
+                            <div className="stats-grid">
+                                <div className="stat-card success">
+                                    <div className="stat-icon success">✓</div>
+                                    <div className="stat-value">{stats.completed}</div>
+                                    <div className="stat-label">Verifiche completate</div>
+                                </div>
+                                <div className="stat-card warning">
+                                    <div className="stat-icon warning"><Icons.Clock /></div>
+                                    <div className="stat-value">{stats.pending}</div>
+                                    <div className="stat-label">In scadenza</div>
+                                </div>
+                                <div className="stat-card danger">
+                                    <div className="stat-icon danger"><Icons.AlertTriangle /></div>
+                                    <div className="stat-value">{stats.overdue}</div>
+                                    <div className="stat-label">Scadute</div>
+                                </div>
+                                <div className="stat-card purple">
+                                    <div className="stat-icon purple"><Icons.BarChart /></div>
+                                    <div className="stat-value">{stats.avgScore}</div>
+                                    <div className="stat-label">Media ultimo trim.</div>
+                                </div>
+                                <div className="stat-card cyan">
+                                    <div className="stat-icon cyan"><Icons.TrendingUp /></div>
+                                    <div className="stat-value">+0.8</div>
+                                    <div className="stat-label">Trend annuale</div>
+                                </div>
+                            </div>
+
+                            {/* Trimestre Tabs */}
+                            <div className="trimestre-tabs">
+                                {trimestri.map(t => (
+                                    <div 
+                                        key={t.id}
+                                        className={`trimestre-tab ${activeTrimestre === t.id ? 'active' : ''} ${getTrimestreStatus(t.id)}`}
+                                        onClick={() => setActiveTrimestre(t.id)}
+                                    >
+                                        <div className="tab-label">{t.label}</div>
+                                        <div className="tab-date">{t.periodo}</div>
+                                        <div className="tab-status">{getStatusLabel(verifiche[t.id].stato)}</div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Verifica Content */}
+                            <div className="card">
+                                <div className="card-header">
+                                    <h3>
+                                        <Icons.Calendar /> 
+                                        {trimestri.find(t => t.id === activeTrimestre)?.label} - Verifica del {currentVerifica.data || '__/__/____'}
+                                    </h3>
+                                    <span className={`badge badge-${currentVerifica.stato === 'completata' ? 'success' : currentVerifica.stato === 'in_scadenza' ? 'warning' : 'danger'}`}>
+                                        {getStatusLabel(currentVerifica.stato)}
+                                    </span>
+                                </div>
+                                <div className="card-body">
+                                    {/* Legenda */}
+                                    <div className="legenda">
+                                        <strong style={{marginRight: 8}}>Legenda punteggi:</strong>
+                                        <div className="legenda-item"><div className="legenda-dot v1">1</div> Molto peggio del solito</div>
+                                        <div className="legenda-item"><div className="legenda-dot v2">2</div> Un po' peggio</div>
+                                        <div className="legenda-item"><div className="legenda-dot v3">3</div> Come al solito</div>
+                                        <div className="legenda-item"><div className="legenda-dot v4">4</div> Un po' meglio</div>
+                                        <div className="legenda-item"><div className="legenda-dot v5">5</div> Molto meglio</div>
+                                        <div className="legenda-item"><div className="legenda-dot v6">6</div> Sconosciuto</div>
+                                    </div>
+
+                                    {/* Aree Grid */}
+                                    <div className="verifica-section">
+                                        <div className="section-title">
+                                            <div className="icon primary">📋</div>
+                                            Valutazione Aree di Intervento
+                                        </div>
+                                        <div className="area-grid">
+                                            {areeIntervento.map((area, idx) => (
+                                                <div key={area.id} className="area-item">
+                                                    <div className="area-number">AREA {area.id}</div>
+                                                    <div className="area-name">{area.nome}</div>
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        max="6"
+                                                        className={`area-input ${currentVerifica.valori[idx] > 0 ? `val-${currentVerifica.valori[idx]}` : ''}`}
+                                                        value={currentVerifica.valori[idx] || ''}
+                                                        onChange={e => updateAreaValue(idx, e.target.value)}
+                                                        placeholder="-"
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* CGI Section */}
+                                    <div className="verifica-section">
+                                        <div className="section-title">
+                                            <div className="icon warning">📊</div>
+                                            Clinical Global Impression (CGI)
+                                        </div>
+                                        <div className="cgi-grid">
+                                            <div className="cgi-card">
+                                                <div className="cgi-title">CGI - Gravità della Malattia</div>
+                                                <div className="cgi-options">
+                                                    {[
+                                                        { v: 1, l: 'Normale, non malato' },
+                                                        { v: 2, l: 'Malattia minima' },
+                                                        { v: 3, l: 'Malattia lieve' },
+                                                        { v: 4, l: 'Malattia moderata' },
+                                                        { v: 5, l: 'Malattia marcata' },
+                                                        { v: 6, l: 'Malattia grave' },
+                                                        { v: 7, l: 'Malattia molto grave' },
+                                                    ].map(opt => (
+                                                        <label key={opt.v} className={`cgi-option ${currentVerifica.cgi === opt.v ? 'selected' : ''}`}>
+                                                            <input 
+                                                                type="radio" 
+                                                                name="cgi" 
+                                                                value={opt.v}
+                                                                checked={currentVerifica.cgi === opt.v}
+                                                                onChange={() => updateCGI('cgi', opt.v)}
+                                                            />
+                                                            <div className="cgi-value">{opt.v}</div>
+                                                            <div className="cgi-label">{opt.l}</div>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div className="cgi-card">
+                                                <div className="cgi-title">CGI - Miglioramento Globale</div>
+                                                <div className="cgi-options">
+                                                    {[
+                                                        { v: 1, l: 'Molto migliorato' },
+                                                        { v: 2, l: 'Moderatamente migliorato' },
+                                                        { v: 3, l: 'Minimamente migliorato' },
+                                                        { v: 4, l: 'Nessun cambiamento' },
+                                                        { v: 5, l: 'Minimamente peggiorato' },
+                                                        { v: 6, l: 'Moderatamente peggiorato' },
+                                                        { v: 7, l: 'Molto peggiorato' },
+                                                    ].map(opt => (
+                                                        <label key={opt.v} className={`cgi-option ${currentVerifica.miglioramento === opt.v ? 'selected' : ''}`}>
+                                                            <input 
+                                                                type="radio" 
+                                                                name="miglioramento" 
+                                                                value={opt.v}
+                                                                checked={currentVerifica.miglioramento === opt.v}
+                                                                onChange={() => updateCGI('miglioramento', opt.v)}
+                                                            />
+                                                            <div className="cgi-value">{opt.v}</div>
+                                                            <div className="cgi-label">{opt.l}</div>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Note */}
+                                    <div className="verifica-section">
+                                        <div className="section-title">
+                                            <div className="icon purple">📝</div>
+                                            Note e Osservazioni
+                                        </div>
+                                        <textarea 
+                                            className="form-textarea" 
+                                            placeholder="Inserisci note e osservazioni sulla verifica trimestrale..."
+                                            style={{minHeight: 120}}
+                                        ></textarea>
+                                    </div>
+
+                                    {/* Firme */}
+                                    <div className="verifica-section">
+                                        <div className="section-title">
+                                            <div className="icon success">✍️</div>
+                                            Firme
+                                        </div>
+                                        <div className="firme-grid">
+                                            <div className="firma-card">
+                                                <div className="firma-role">Il Coordinatore</div>
+                                                <div className="firma-name">Dr. Beneventano Michele</div>
+                                                <div className="firma-line"></div>
+                                                <div className="firma-date">Data: {currentVerifica.data || '__/__/____'}</div>
+                                            </div>
+                                            <div className="firma-card">
+                                                <div className="firma-role">L'Assistente Sociale</div>
+                                                <div className="firma-name">Dr.ssa Santina Maria</div>
+                                                <div className="firma-line"></div>
+                                                <div className="firma-date">Data: {currentVerifica.data || '__/__/____'}</div>
+                                            </div>
+                                            <div className="firma-card">
+                                                <div className="firma-role">L'Operatore</div>
+                                                <div className="firma-name">Beneventano Michele</div>
+                                                <div className="firma-line"></div>
+                                                <div className="firma-date">Data: {currentVerifica.data || '__/__/____'}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Storico Annuale */}
+                            <div className="card">
+                                <div className="card-header">
+                                    <h3><Icons.BarChart /> Storico Verifiche Anno {mockPatient.anno}</h3>
+                                </div>
+                                <div className="card-body">
+                                    <table className="storico-table">
+                                        <thead>
+                                            <tr>
+                                                <th style={{textAlign: 'left'}}>Area</th>
+                                                <th>I° Trim</th>
+                                                <th>II° Trim</th>
+                                                <th>III° Trim</th>
+                                                <th>IV° Trim</th>
+                                                <th>Trend</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {areeIntervento.map((area, idx) => {
+                                                const vals = [
+                                                    verifiche.Q1.valori[idx],
+                                                    verifiche.Q2.valori[idx],
+                                                    verifiche.Q3.valori[idx],
+                                                    verifiche.Q4.valori[idx]
+                                                ];
+                                                const lastTwo = vals.filter(v => v > 0).slice(-2);
+                                                const trend = lastTwo.length === 2 
+                                                    ? (lastTwo[1] > lastTwo[0] ? 'up' : lastTwo[1] < lastTwo[0] ? 'down' : 'stable')
+                                                    : 'stable';
+                                                
+                                                return (
+                                                    <tr key={area.id}>
+                                                        <td className="area-col">{area.id}. {area.nome}</td>
+                                                        {vals.map((v, i) => (
+                                                            <td key={i}>
+                                                                {v > 0 ? <span className={`val val-${v}`}>{v}</span> : '-'}
+                                                            </td>
+                                                        ))}
+                                                        <td className={`trend-${trend}`}>
+                                                            {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'}
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                            <tr style={{background: 'var(--gray-50)', fontWeight: 600}}>
+                                                <td className="area-col">MEDIA</td>
+                                                {['Q1', 'Q2', 'Q3', 'Q4'].map(q => {
+                                                    const vals = verifiche[q].valori.filter(v => v > 0);
+                                                    const avg = vals.length > 0 ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : '-';
+                                                    return <td key={q}>{avg}</td>;
+                                                })}
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {/* Dichiarazione Accettazione */}
+                            <div className="note-box">
+                                <div className="note-title">📜 Dichiarazione di Accettazione</div>
+                                <div className="note-text">
+                                    Il/La sottoscritto/a <strong>{mockPatient.cognome} {mockPatient.nome}</strong> dichiara di aver preso visione del proprio progetto personalizzato, 
+                                    di aver ricevuto chiare ed esaustive informazioni al riguardo, e di fornire il proprio consenso alla realizzazione dello stesso.
+                                </div>
+                                <div style={{marginTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                                    <div>
+                                        <div style={{fontSize: 12, color: 'var(--gray-500)'}}>Firma per accettazione</div>
+                                        <div style={{borderBottom: '2px dotted var(--gray-400)', width: 200, marginTop: 20}}></div>
+                                    </div>
+                                    <div>
+                                        <div style={{fontSize: 12, color: 'var(--gray-500)'}}>Data</div>
+                                        <div style={{borderBottom: '2px dotted var(--gray-400)', width: 150, marginTop: 20}}></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="footer-actions">
+                                <div className="footer-info">
+                                    <Icons.Clock /> Ultima modifica: {new Date().toLocaleDateString('it-IT')} {new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute: '2-digit'})}
+                                </div>
+                                <div className="footer-buttons">
+                                    <a href="lucania-care-v3-main.html" className="btn btn-secondary">Annulla</a>
+                                    <button className="btn btn-outline" onClick={() => window.print()}><Icons.Printer /> Stampa</button>
+                                    <button className="btn btn-success btn-lg" onClick={handleSave}><Icons.Save /> Salva Verifica</button>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+
+                    {/* Toast */}
+                    {showToast && (
+                        <div className="toast success">
+                            <Icons.Check /> {toastMessage}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<VerificheApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>

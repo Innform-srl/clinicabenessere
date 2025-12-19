@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucania-Care v3.0 - Area Clinica</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb; --primary-dark: #1d4ed8; --primary-light: #dbeafe;
+            --success: #10b981; --success-light: #d1fae5;
+            --warning: #f59e0b; --warning-light: #fef3c7;
+            --danger: #ef4444; --danger-light: #fee2e2;
+            --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+            --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280;
+            --gray-600: #4b5563; --gray-700: #374151; --gray-800: #1f2937; --gray-900: #111827;
+            --purple: #8b5cf6; --purple-light: #ede9fe;
+            --cyan: #06b6d4; --cyan-light: #cffafe;
+            --teal: #14b8a6; --teal-light: #ccfbf1;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--gray-50); color: var(--gray-800); }
+        .app-container { display: flex; min-height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar { width: 260px; background: linear-gradient(180deg, var(--gray-900) 0%, var(--gray-800) 100%); color: white; padding: 16px 0; position: fixed; height: 100vh; overflow-y: auto; z-index: 100; }
+        .sidebar-header { padding: 0 16px 16px; border-bottom: 1px solid var(--gray-700); margin-bottom: 16px; }
+        .sidebar-logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--danger) 0%, var(--warning) 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+        .logo-text h1 { font-size: 16px; font-weight: 700; color: white; }
+        .logo-text span { font-size: 10px; color: var(--gray-400); }
+        .nav-section { margin-bottom: 20px; }
+        .nav-section-title { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--gray-500); padding: 0 16px; margin-bottom: 6px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: var(--gray-400); cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; font-size: 13px; text-decoration: none; }
+        .nav-item:hover { background: var(--gray-700); color: white; }
+        .nav-item.active { background: rgba(239, 68, 68, 0.15); color: var(--danger); border-left-color: var(--danger); }
+        .nav-item svg { width: 18px; height: 18px; }
+        .nav-badge { margin-left: auto; background: var(--danger); color: white; font-size: 10px; padding: 2px 6px; border-radius: 8px; font-weight: 600; }
+        .nav-external { font-size: 9px; color: var(--gray-500); margin-left: auto; }
+        
+        /* Main Content */
+        .main-content { flex: 1; margin-left: 260px; min-height: 100vh; }
+        .header { background: white; padding: 14px 24px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+        .header-title h2 { font-size: 18px; font-weight: 600; color: var(--gray-900); }
+        .header-title p { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+        .search-box { display: flex; align-items: center; gap: 8px; background: var(--gray-100); padding: 8px 14px; border-radius: 8px; width: 240px; }
+        .search-box input { border: none; background: transparent; outline: none; flex: 1; font-size: 13px; }
+        .user-menu { display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; background: var(--gray-100); border-radius: 8px; cursor: pointer; }
+        .user-avatar { width: 30px; height: 30px; border-radius: 6px; background: linear-gradient(135deg, var(--danger) 0%, var(--warning) 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 12px; }
+        .content { padding: 20px 24px; }
+        
+        /* Cards */
+        .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 16px; overflow: hidden; }
+        .card-header { padding: 14px 16px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: space-between; }
+        .card-header h3 { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+        .card-body { padding: 16px; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+        .stat-card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .stat-card.primary { border-left: 4px solid var(--primary); }
+        .stat-card.success { border-left: 4px solid var(--success); }
+        .stat-card.warning { border-left: 4px solid var(--warning); }
+        .stat-card.danger { border-left: 4px solid var(--danger); }
+        .stat-card.purple { border-left: 4px solid var(--purple); }
+        .stat-card.cyan { border-left: 4px solid var(--cyan); }
+        .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 10px; }
+        .stat-icon.primary { background: var(--primary-light); color: var(--primary); }
+        .stat-icon.success { background: var(--success-light); color: var(--success); }
+        .stat-icon.warning { background: var(--warning-light); color: var(--warning); }
+        .stat-icon.danger { background: var(--danger-light); color: var(--danger); }
+        .stat-icon.purple { background: var(--purple-light); color: var(--purple); }
+        .stat-icon.cyan { background: var(--cyan-light); color: var(--cyan); }
+        .stat-value { font-size: 24px; font-weight: 700; color: var(--gray-900); }
+        .stat-label { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+        
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        
+        /* Table */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--gray-100); }
+        th { background: var(--gray-50); font-weight: 600; color: var(--gray-600); font-size: 11px; text-transform: uppercase; }
+        tr:hover { background: var(--gray-50); }
+        
+        /* Form Elements */
+        .form-select, .form-input { padding: 8px 12px; border: 1px solid var(--gray-200); border-radius: 6px; font-size: 13px; width: 100%; background: white; }
+        .form-select:focus, .form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+        
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-secondary { background: var(--gray-100); color: var(--gray-700); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-purple { background: var(--purple); color: white; }
+        .btn-cyan { background: var(--cyan); color: white; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
+        .btn-icon { width: 32px; height: 32px; padding: 0; border-radius: 6px; }
+        
+        /* Badge */
+        .badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+        .badge-primary { background: var(--primary-light); color: var(--primary); }
+        .badge-success { background: var(--success-light); color: var(--success); }
+        .badge-warning { background: var(--warning-light); color: var(--warning); }
+        .badge-danger { background: var(--danger-light); color: var(--danger); }
+        .badge-purple { background: var(--purple-light); color: var(--purple); }
+        .badge-cyan { background: var(--cyan-light); color: var(--cyan); }
+        
+        /* Tabs */
+        .tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+        .tab { padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; background: var(--gray-100); color: var(--gray-600); cursor: pointer; border: none; transition: all 0.2s; }
+        .tab:hover { background: var(--gray-200); }
+        .tab.active { background: var(--danger); color: white; }
+        
+        /* Vital Cards */
+        .vital-card { background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .vital-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 24px; }
+        .vital-value { font-size: 28px; font-weight: 700; color: var(--gray-900); }
+        .vital-unit { font-size: 14px; font-weight: 400; color: var(--gray-500); }
+        .vital-label { font-size: 12px; color: var(--gray-500); margin-top: 4px; }
+        .vital-status { font-size: 11px; padding: 4px 10px; border-radius: 12px; margin-top: 8px; display: inline-block; }
+        .vital-status.normal { background: var(--success-light); color: var(--success); }
+        .vital-status.warning { background: var(--warning-light); color: var(--warning); }
+        .vital-status.danger { background: var(--danger-light); color: var(--danger); }
+        
+        /* Glucose Chart */
+        .glucose-chart { height: 200px; background: linear-gradient(180deg, var(--cyan-light) 0%, white 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .glucose-bars { display: flex; align-items: flex-end; gap: 8px; height: 120px; }
+        .glucose-bar { width: 30px; background: var(--cyan); border-radius: 4px 4px 0 0; transition: height 0.3s; }
+        .glucose-labels { display: flex; gap: 8px; margin-top: 8px; }
+        .glucose-labels span { width: 30px; text-align: center; font-size: 10px; color: var(--gray-500); }
+        
+        /* Animation */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        
+        @media (max-width: 1200px) { .stats-grid, .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; } .stats-grid, .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Icons
+        const Icons = {
+            Home: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+            Pill: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>,
+            Heart: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>,
+            Droplets: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/></svg>,
+            Activity: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+            Thermometer: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg>,
+            Search: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+            Plus: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+            Minus: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+            Download: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+            AlertTriangle: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/></svg>,
+            ExternalLink: () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+        };
+
+        // Mock Data
+        const mockPazienti = [
+            { id: 1, nome: 'Teresa', cognome: 'Basile' },
+            { id: 2, nome: 'Roberto', cognome: 'Gisoldo' },
+            { id: 3, nome: 'Lucia', cognome: 'Gravina' },
+            { id: 8, nome: 'Giovanni', cognome: 'Pacella' },
+            { id: 11, nome: 'Lucio', cognome: 'Riviello' },
+        ];
+
+        const initialFarmaci = [
+            { id: 1, nome: 'CLOZAPINA 100MG', tipo: 'PS', giacenza: 18, scadenza: '31/03/2025', alert: false, confezione: 28 },
+            { id: 2, nome: 'AKINETON 4MG', tipo: 'PS', giacenza: 8, scadenza: '31/01/2025', alert: true, confezione: 50 },
+            { id: 3, nome: 'ANAFRANIL 75MG', tipo: 'PS', giacenza: 6, scadenza: '01/07/2025', alert: true, confezione: 20 },
+            { id: 4, nome: 'DEPAKIN CHRONO 300MG', tipo: 'PS', giacenza: 9, scadenza: '31/05/2025', alert: false, confezione: 30 },
+            { id: 5, nome: 'HALDOL GOCCE', tipo: 'PS', giacenza: 4, scadenza: '30/12/2024', alert: true, confezione: 1 },
+            { id: 6, nome: 'RISPERDAL 2MG', tipo: 'PS', giacenza: 15, scadenza: '15/06/2025', alert: false, confezione: 60 },
+            { id: 7, nome: 'LYRICA 75MG', tipo: 'PS', giacenza: 12, scadenza: '28/02/2025', alert: false, confezione: 56 },
+            { id: 8, nome: 'RIVOTRIL GOCCE', tipo: 'PS', giacenza: 10, scadenza: '30/09/2025', alert: false, confezione: 1 },
+            { id: 9, nome: 'ANTRA 20MG', tipo: 'NPS', giacenza: 8, scadenza: '01/03/2025', alert: false, confezione: 14 },
+            { id: 10, nome: 'CARDIOASPIRINA 100MG', tipo: 'NPS', giacenza: 3, scadenza: '08/01/2025', alert: true, confezione: 30 },
+            { id: 11, nome: 'EUTIROX 50MG', tipo: 'NPS', giacenza: 22, scadenza: '15/08/2025', alert: false, confezione: 50 },
+            { id: 12, nome: 'GLUCOPHAGE 1000MG', tipo: 'NPS', giacenza: 16, scadenza: '20/04/2025', alert: false, confezione: 30 },
+            { id: 13, nome: 'LASIX 25MG', tipo: 'NPS', giacenza: 5, scadenza: '10/02/2025', alert: true, confezione: 30 },
+            { id: 14, nome: 'TAVOR 1MG', tipo: 'FC', giacenza: 6, scadenza: '31/07/2025', alert: false, confezione: 20 },
+            { id: 15, nome: 'EN GOCCE', tipo: 'FC', giacenza: 7, scadenza: '31/01/2026', alert: false, confezione: 1 },
+        ];
+
+        const mockParametri = [
+            { id: 1, paziente: 'Basile T.', data: '27/11 08:00', pa: '120/80', fc: 72, temp: 36.5, glicemia: null, peso: 68.5, spo2: 98 },
+            { id: 2, paziente: 'Pacella G.', data: '27/11 08:00', pa: '135/85', fc: 78, temp: 36.8, glicemia: 142, peso: 82.3, spo2: 97 },
+            { id: 3, paziente: 'Gravina L.', data: '27/11 08:00', pa: '150/95', fc: 82, temp: 36.4, glicemia: null, peso: 71.0, spo2: 98 },
+            { id: 4, paziente: 'Gisoldo R.', data: '26/11 08:00', pa: '118/78', fc: 70, temp: 36.6, glicemia: null, peso: 75.2, spo2: 99 },
+            { id: 5, paziente: 'Riviello L.', data: '26/11 08:00', pa: '128/82', fc: 74, temp: 36.7, glicemia: null, peso: 79.8, spo2: 98 },
+        ];
+
+        const mockGlicemia = [
+            { giorno: 'Lun', digiuno: 105, postPranzo: 142 },
+            { giorno: 'Mar', digiuno: 98, postPranzo: 138 },
+            { giorno: 'Mer', digiuno: 112, postPranzo: 180 },
+            { giorno: 'Gio', digiuno: 108, postPranzo: 155 },
+            { giorno: 'Ven', digiuno: 102, postPranzo: 148 },
+            { giorno: 'Sab', digiuno: 95, postPranzo: 135 },
+            { giorno: 'Dom', digiuno: 110, postPranzo: 160 },
+        ];
+
+        // App Component
+        const ClinicalApp = () => {
+            const [activeSection, setActiveSection] = useState('farmaci');
+            const [farmaci, setFarmaci] = useState(initialFarmaci);
+
+            const navSections = [
+                { title: 'Navigazione', items: [
+                    { id: 'back', icon: Icons.Home, label: '← Torna a Dashboard', external: true, href: 'lucania-care-v3-main.html' },
+                ]},
+                { title: 'Area Clinica', items: [
+                    { id: 'farmaci', icon: Icons.Pill, label: 'Gestione Farmaci', badge: farmaci.filter(f => f.alert).length },
+                    { id: 'parametri', icon: Icons.Heart, label: 'Parametri Vitali' },
+                    { id: 'glicemia', icon: Icons.Droplets, label: 'Profilo Glicemico' },
+                ]},
+            ];
+
+            const handleCaricoScarico = (id, tipo) => {
+                setFarmaci(prev => prev.map(f => {
+                    if (f.id === id) {
+                        const newGiacenza = tipo === 'carico' ? f.giacenza + 1 : Math.max(0, f.giacenza - 1);
+                        return { ...f, giacenza: newGiacenza, alert: newGiacenza <= 5 };
+                    }
+                    return f;
+                }));
+            };
+
+            const titles = {
+                farmaci: { t: 'Gestione Farmaci', d: 'Inventario, carico/scarico e alert scorte' },
+                parametri: { t: 'Parametri Vitali', d: 'Pressione, temperatura, FC, saturazione' },
+                glicemia: { t: 'Profilo Glicemico', d: 'Monitoraggio pazienti diabetici' },
+            };
+
+            return (
+                <div className="app-container">
+                    <aside className="sidebar">
+                        <div className="sidebar-header">
+                            <div className="sidebar-logo">
+                                <div className="logo-icon">💊</div>
+                                <div className="logo-text">
+                                    <h1>Area Clinica</h1>
+                                    <span>Lucania-Care v3.0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <nav>
+                            {navSections.map((section, idx) => (
+                                <div key={idx} className="nav-section">
+                                    <div className="nav-section-title">{section.title}</div>
+                                    {section.items.map(item => (
+                                        item.external ? (
+                                            <a key={item.id} href={item.href} className="nav-item">
+                                                <item.icon />
+                                                <span>{item.label}</span>
+                                            </a>
+                                        ) : (
+                                            <div key={item.id} className={`nav-item ${activeSection === item.id ? 'active' : ''}`} onClick={() => setActiveSection(item.id)}>
+                                                <item.icon />
+                                                <span>{item.label}</span>
+                                                {item.badge > 0 && <span className="nav-badge">{item.badge}</span>}
+                                            </div>
+                                        )
+                                    ))}
+                                </div>
+                            ))}
+                        </nav>
+                    </aside>
+
+                    <main className="main-content">
+                        <header className="header">
+                            <div className="header-title">
+                                <h2>{titles[activeSection]?.t}</h2>
+                                <p>{titles[activeSection]?.d}</p>
+                            </div>
+                            <div className="header-actions">
+                                <div className="search-box">
+                                    <Icons.Search />
+                                    <input type="text" placeholder="Cerca farmaco..." />
+                                </div>
+                                <div className="user-menu">
+                                    <div className="user-avatar">MB</div>
+                                </div>
+                            </div>
+                        </header>
+                        <div className="content fade-in">
+                            {activeSection === 'farmaci' && <FarmaciSection farmaci={farmaci} onCaricoScarico={handleCaricoScarico} />}
+                            {activeSection === 'parametri' && <ParametriSection />}
+                            {activeSection === 'glicemia' && <GlicemiaSection />}
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        // Farmaci Section con + e -
+        const FarmaciSection = ({ farmaci, onCaricoScarico }) => {
+            const [tab, setTab] = useState('tutti');
+            const filtered = tab === 'tutti' ? farmaci : 
+                            tab === 'alert' ? farmaci.filter(f => f.alert) : 
+                            farmaci.filter(f => f.tipo === tab.toUpperCase());
+
+            return (
+                <>
+                    <div className="stats-grid">
+                        <div className="stat-card primary">
+                            <div className="stat-icon primary">💊</div>
+                            <div className="stat-value">{farmaci.length}</div>
+                            <div className="stat-label">Farmaci Totali</div>
+                        </div>
+                        <div className="stat-card purple">
+                            <div className="stat-icon purple">🧠</div>
+                            <div className="stat-value">{farmaci.filter(f => f.tipo === 'PS').length}</div>
+                            <div className="stat-label">Psichiatrici</div>
+                        </div>
+                        <div className="stat-card cyan">
+                            <div className="stat-icon cyan">💉</div>
+                            <div className="stat-value">{farmaci.filter(f => f.tipo === 'NPS').length}</div>
+                            <div className="stat-label">Non Psichiatrici</div>
+                        </div>
+                        <div className="stat-card danger">
+                            <div className="stat-icon danger"><Icons.AlertTriangle /></div>
+                            <div className="stat-value">{farmaci.filter(f => f.alert).length}</div>
+                            <div className="stat-label">Alert Scorte</div>
+                        </div>
+                    </div>
+
+                    <div className="card">
+                        <div className="card-header">
+                            <div className="tabs" style={{margin: 0}}>
+                                {['tutti', 'ps', 'nps', 'fc', 'alert'].map(t => (
+                                    <button key={t} className={`tab ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>
+                                        {t === 'tutti' ? 'Tutti' : t === 'alert' ? '⚠️ Alert' : t.toUpperCase()}
+                                    </button>
+                                ))}
+                            </div>
+                            <div style={{display: 'flex', gap: 8}}>
+                                <button className="btn btn-secondary"><Icons.Download /> Stampa Bimestrale</button>
+                                <button className="btn btn-primary"><Icons.Plus /> Nuovo Farmaco</button>
+                            </div>
+                        </div>
+                        <div className="card-body" style={{padding: 0}}>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Farmaco</th>
+                                        <th>Tipo</th>
+                                        <th>Conf.</th>
+                                        <th>Giacenza</th>
+                                        <th>Scadenza</th>
+                                        <th>Stato</th>
+                                        <th style={{textAlign: 'center'}}>Carico/Scarico</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filtered.map(f => (
+                                        <tr key={f.id} style={{background: f.alert ? 'var(--danger-light)' : 'transparent'}}>
+                                            <td>{f.id}</td>
+                                            <td style={{fontWeight: 600}}>{f.nome}</td>
+                                            <td>
+                                                <span className={`badge badge-${f.tipo === 'PS' ? 'purple' : f.tipo === 'NPS' ? 'cyan' : 'warning'}`}>
+                                                    {f.tipo}
+                                                </span>
+                                            </td>
+                                            <td>{f.confezione}</td>
+                                            <td>
+                                                <span className={`badge ${f.giacenza <= 5 ? 'badge-danger' : f.giacenza <= 10 ? 'badge-warning' : 'badge-success'}`}>
+                                                    {f.giacenza}
+                                                </span>
+                                            </td>
+                                            <td>{f.scadenza}</td>
+                                            <td>
+                                                {f.alert ? <span className="badge badge-danger">⚠️ Riordino</span> : <span className="badge badge-success">OK</span>}
+                                            </td>
+                                            <td style={{textAlign: 'center'}}>
+                                                <button className="btn btn-sm btn-success btn-icon" onClick={() => onCaricoScarico(f.id, 'carico')} title="Carico +1">
+                                                    <Icons.Plus />
+                                                </button>
+                                                <button className="btn btn-sm btn-danger btn-icon" onClick={() => onCaricoScarico(f.id, 'scarico')} title="Scarico -1" style={{marginLeft: 4}}>
+                                                    <Icons.Minus />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </>
+            );
+        };
+
+        // Parametri Vitali Section - Migliorata
+        const ParametriSection = () => (
+            <>
+                <div className="card" style={{marginBottom: 16}}>
+                    <div className="card-header">
+                        <h3>👤 Monitoraggio Parametri Vitali</h3>
+                        <div style={{display: 'flex', gap: 8}}>
+                            <select className="form-select" style={{width: 200}}>
+                                {mockPazienti.map(p => <option key={p.id}>{p.cognome} {p.nome}</option>)}
+                            </select>
+                            <button className="btn btn-primary"><Icons.Plus /> Nuova Rilevazione</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid-4" style={{marginBottom: 20}}>
+                    <div className="vital-card">
+                        <div className="vital-icon" style={{background: 'var(--danger-light)', color: 'var(--danger)'}}>
+                            <Icons.Heart />
+                        </div>
+                        <div className="vital-value">120<span className="vital-unit">/80</span></div>
+                        <div className="vital-label">Pressione Arteriosa (mmHg)</div>
+                        <div className="vital-status normal">✓ Normale</div>
+                    </div>
+                    <div className="vital-card">
+                        <div className="vital-icon" style={{background: 'var(--warning-light)', color: 'var(--warning)'}}>
+                            <Icons.Thermometer />
+                        </div>
+                        <div className="vital-value">36.5<span className="vital-unit">°C</span></div>
+                        <div className="vital-label">Temperatura Corporea</div>
+                        <div className="vital-status normal">✓ Normale</div>
+                    </div>
+                    <div className="vital-card">
+                        <div className="vital-icon" style={{background: 'var(--primary-light)', color: 'var(--primary)'}}>
+                            <Icons.Activity />
+                        </div>
+                        <div className="vital-value">72<span className="vital-unit">bpm</span></div>
+                        <div className="vital-label">Frequenza Cardiaca</div>
+                        <div className="vital-status normal">✓ Normale</div>
+                    </div>
+                    <div className="vital-card">
+                        <div className="vital-icon" style={{background: 'var(--cyan-light)', color: 'var(--cyan)'}}>
+                            💨
+                        </div>
+                        <div className="vital-value">98<span className="vital-unit">%</span></div>
+                        <div className="vital-label">Saturazione O₂ (SpO₂)</div>
+                        <div className="vital-status normal">✓ Normale</div>
+                    </div>
+                </div>
+
+                <div className="card">
+                    <div className="card-header">
+                        <h3>📊 Storico Rilevazioni</h3>
+                        <button className="btn btn-sm btn-secondary"><Icons.Download /> Esporta</button>
+                    </div>
+                    <div className="card-body" style={{padding: 0}}>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Paziente</th>
+                                    <th>Data/Ora</th>
+                                    <th>PA Sist.</th>
+                                    <th>PA Diast.</th>
+                                    <th>Temp.</th>
+                                    <th>FC</th>
+                                    <th>SpO₂</th>
+                                    <th>Peso</th>
+                                    <th>Glicemia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {mockParametri.map(p => {
+                                    const [sist, diast] = p.pa.split('/');
+                                    const paAlta = parseInt(sist) > 140 || parseInt(diast) > 90;
+                                    return (
+                                        <tr key={p.id} style={{background: paAlta ? 'var(--warning-light)' : 'transparent'}}>
+                                            <td style={{fontWeight: 600}}>{p.paziente}</td>
+                                            <td>{p.data}</td>
+                                            <td style={{color: parseInt(sist) > 140 ? 'var(--danger)' : 'inherit', fontWeight: parseInt(sist) > 140 ? 600 : 400}}>{sist}</td>
+                                            <td style={{color: parseInt(diast) > 90 ? 'var(--danger)' : 'inherit', fontWeight: parseInt(diast) > 90 ? 600 : 400}}>{diast}</td>
+                                            <td>{p.temp}°C</td>
+                                            <td>{p.fc} bpm</td>
+                                            <td>{p.spo2}%</td>
+                                            <td>{p.peso} kg</td>
+                                            <td>{p.glicemia ? <span className={`badge ${p.glicemia > 126 ? 'badge-warning' : 'badge-success'}`}>{p.glicemia}</span> : '-'}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </>
+        );
+
+        // Glicemia Section
+        const GlicemiaSection = () => (
+            <>
+                <div className="stats-grid" style={{gridTemplateColumns: 'repeat(3, 1fr)'}}>
+                    <div className="stat-card success">
+                        <div className="stat-icon success"><Icons.Droplets /></div>
+                        <div className="stat-value">105</div>
+                        <div className="stat-label">Glicemia a digiuno (mg/dL)</div>
+                    </div>
+                    <div className="stat-card warning">
+                        <div className="stat-icon warning"><Icons.Activity /></div>
+                        <div className="stat-value">142</div>
+                        <div className="stat-label">Post-prandiale (mg/dL)</div>
+                    </div>
+                    <div className="stat-card primary">
+                        <div className="stat-icon primary">📊</div>
+                        <div className="stat-value">6.2%</div>
+                        <div className="stat-label">HbA1c stimata</div>
+                    </div>
+                </div>
+
+                <div className="card">
+                    <div className="card-header">
+                        <h3>📈 Profilo Glicemico - Pacella Giovanni</h3>
+                        <button className="btn btn-primary"><Icons.Plus /> Nuova Misurazione</button>
+                    </div>
+                    <div className="card-body">
+                        <div className="glucose-chart">
+                            <div className="glucose-bars">
+                                {mockGlicemia.map((g, i) => (
+                                    <div key={i} className="glucose-bar" style={{height: `${(g.postPranzo / 200) * 100}%`, background: g.postPranzo > 160 ? 'var(--danger)' : g.postPranzo > 140 ? 'var(--warning)' : 'var(--cyan)'}} title={`${g.giorno}: ${g.postPranzo} mg/dL`}></div>
+                                ))}
+                            </div>
+                            <div className="glucose-labels">
+                                {mockGlicemia.map((g, i) => <span key={i}>{g.giorno}</span>)}
+                            </div>
+                        </div>
+
+                        <table style={{marginTop: 20}}>
+                            <thead>
+                                <tr>
+                                    <th>Giorno</th>
+                                    <th>Digiuno</th>
+                                    <th>Pre-pranzo</th>
+                                    <th>Post-pranzo</th>
+                                    <th>Pre-cena</th>
+                                    <th>Post-cena</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {mockGlicemia.slice(0, 4).map((g, i) => (
+                                    <tr key={i}>
+                                        <td style={{fontWeight: 600}}>{g.giorno}</td>
+                                        <td style={{color: g.digiuno > 110 ? 'var(--warning)' : 'var(--success)'}}>{g.digiuno}</td>
+                                        <td>-</td>
+                                        <td style={{color: g.postPranzo > 160 ? 'var(--danger)' : g.postPranzo > 140 ? 'var(--warning)' : 'var(--success)'}}>{g.postPranzo}</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </>
+        );
+
+        ReactDOM.render(<ClinicalApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>

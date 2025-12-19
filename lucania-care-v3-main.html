@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucania-Care v3.0 - Dashboard & Anagrafica</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb; --primary-dark: #1d4ed8; --primary-light: #dbeafe;
+            --success: #10b981; --success-light: #d1fae5;
+            --warning: #f59e0b; --warning-light: #fef3c7;
+            --danger: #ef4444; --danger-light: #fee2e2;
+            --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+            --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280;
+            --gray-600: #4b5563; --gray-700: #374151; --gray-800: #1f2937; --gray-900: #111827;
+            --purple: #8b5cf6; --purple-light: #ede9fe;
+            --cyan: #06b6d4; --cyan-light: #cffafe;
+            --teal: #14b8a6; --teal-light: #ccfbf1;
+            --orange: #f97316; --orange-light: #fed7aa;
+            --pink: #ec4899; --pink-light: #fce7f3;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--gray-50); color: var(--gray-800); }
+        .app-container { display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background: linear-gradient(180deg, var(--gray-900) 0%, var(--gray-800) 100%); color: white; padding: 16px 0; position: fixed; height: 100vh; overflow-y: auto; z-index: 100; }
+        .sidebar-header { padding: 0 16px 16px; border-bottom: 1px solid var(--gray-700); margin-bottom: 16px; }
+        .sidebar-logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary) 0%, var(--cyan) 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+        .logo-text h1 { font-size: 16px; font-weight: 700; color: white; }
+        .logo-text span { font-size: 10px; color: var(--gray-400); }
+        .nav-section { margin-bottom: 20px; }
+        .nav-section-title { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--gray-500); padding: 0 16px; margin-bottom: 6px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: var(--gray-400); cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; font-size: 13px; text-decoration: none; }
+        .nav-item:hover { background: var(--gray-700); color: white; }
+        .nav-item.active { background: rgba(37, 99, 235, 0.15); color: var(--primary); border-left-color: var(--primary); }
+        .nav-item svg { width: 18px; height: 18px; }
+        .nav-badge { margin-left: auto; background: var(--danger); color: white; font-size: 10px; padding: 2px 6px; border-radius: 8px; font-weight: 600; }
+        .nav-external { font-size: 9px; color: var(--gray-500); margin-left: auto; }
+        .main-content { flex: 1; margin-left: 260px; min-height: 100vh; }
+        .header { background: white; padding: 14px 24px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+        .header-title h2 { font-size: 18px; font-weight: 600; color: var(--gray-900); }
+        .header-title p { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+        .search-box { display: flex; align-items: center; gap: 8px; background: var(--gray-100); padding: 8px 14px; border-radius: 8px; width: 240px; }
+        .search-box input { border: none; background: transparent; outline: none; flex: 1; font-size: 13px; }
+        .notification-btn { position: relative; width: 38px; height: 38px; border-radius: 8px; background: var(--gray-100); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .notification-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; border: 2px solid white; }
+        .user-menu { display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; background: var(--gray-100); border-radius: 8px; cursor: pointer; }
+        .user-avatar { width: 30px; height: 30px; border-radius: 6px; background: linear-gradient(135deg, var(--primary) 0%, var(--purple) 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 12px; }
+        .user-info span { font-size: 13px; font-weight: 500; color: var(--gray-700); }
+        .user-info small { font-size: 10px; color: var(--gray-500); display: block; }
+        .content { padding: 20px 24px; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 16px; overflow: hidden; }
+        .card-header { padding: 14px 16px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: space-between; }
+        .card-header h3 { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+        .card-body { padding: 16px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+        .stat-card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .stat-card.primary { border-left: 4px solid var(--primary); }
+        .stat-card.success { border-left: 4px solid var(--success); }
+        .stat-card.warning { border-left: 4px solid var(--warning); }
+        .stat-card.danger { border-left: 4px solid var(--danger); }
+        .stat-card.purple { border-left: 4px solid var(--purple); }
+        .stat-card.cyan { border-left: 4px solid var(--cyan); }
+        .stat-card.teal { border-left: 4px solid var(--teal); }
+        .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 10px; }
+        .stat-icon.primary { background: var(--primary-light); color: var(--primary); }
+        .stat-icon.success { background: var(--success-light); color: var(--success); }
+        .stat-icon.warning { background: var(--warning-light); color: var(--warning); }
+        .stat-icon.danger { background: var(--danger-light); color: var(--danger); }
+        .stat-icon.purple { background: var(--purple-light); color: var(--purple); }
+        .stat-icon.cyan { background: var(--cyan-light); color: var(--cyan); }
+        .stat-icon.teal { background: var(--teal-light); color: var(--teal); }
+        .stat-value { font-size: 24px; font-weight: 700; color: var(--gray-900); }
+        .stat-label { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+        .stat-change { font-size: 11px; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+        .stat-change.up { color: var(--success); }
+        .stat-change.down { color: var(--danger); }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--gray-100); }
+        th { background: var(--gray-50); font-weight: 600; color: var(--gray-600); font-size: 11px; text-transform: uppercase; }
+        tr:hover { background: var(--gray-50); }
+        .form-select, .form-input, .form-textarea { padding: 8px 12px; border: 1px solid var(--gray-200); border-radius: 6px; font-size: 13px; width: 100%; background: white; }
+        .form-select:focus, .form-input:focus, .form-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+        .form-textarea { min-height: 80px; resize: vertical; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: var(--gray-100); color: var(--gray-700); }
+        .btn-secondary:hover { background: var(--gray-200); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-purple { background: var(--purple); color: white; }
+        .btn-cyan { background: var(--cyan); color: white; }
+        .btn-teal { background: var(--teal); color: white; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
+        .badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+        .badge-primary { background: var(--primary-light); color: var(--primary); }
+        .badge-success { background: var(--success-light); color: var(--success); }
+        .badge-warning { background: var(--warning-light); color: var(--warning); }
+        .badge-danger { background: var(--danger-light); color: var(--danger); }
+        .badge-purple { background: var(--purple-light); color: var(--purple); }
+        .badge-cyan { background: var(--cyan-light); color: var(--cyan); }
+        .badge-gray { background: var(--gray-100); color: var(--gray-600); }
+        .timeline { position: relative; }
+        .timeline-item { display: flex; gap: 14px; padding: 12px 0; position: relative; }
+        .timeline-item:not(:last-child):before { content: ''; position: absolute; left: 7px; top: 32px; width: 2px; height: calc(100% - 20px); background: var(--gray-200); }
+        .timeline-dot { width: 16px; height: 16px; border-radius: 50%; background: var(--primary); flex-shrink: 0; margin-top: 2px; }
+        .timeline-content { flex: 1; }
+        .timeline-time { font-size: 11px; color: var(--gray-500); margin-bottom: 2px; }
+        .timeline-title { font-size: 13px; font-weight: 600; color: var(--gray-800); margin-bottom: 2px; }
+        .timeline-text { font-size: 12px; color: var(--gray-600); }
+        .storico-table th, .storico-table td { text-align: center; padding: 8px; }
+        .storico-table .area-name { text-align: left; font-weight: 500; font-size: 12px; }
+        .storico-table .year-header { font-size: 11px; min-width: 60px; }
+        .storico-table .valore-0 { background: var(--danger-light); color: var(--danger); font-weight: 600; }
+        .storico-table .valore-1 { background: var(--warning-light); color: var(--warning); font-weight: 600; }
+        .storico-table .valore-2 { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+        .storico-table .valore-3 { background: var(--cyan-light); color: var(--cyan); font-weight: 600; }
+        .storico-table .valore-4 { background: var(--success-light); color: var(--success); font-weight: 600; }
+        .storico-table .trend-up { color: var(--success); font-weight: 700; font-size: 16px; }
+        .storico-table .trend-down { color: var(--danger); font-weight: 700; font-size: 16px; }
+        .storico-table .trend-stable { color: var(--gray-400); font-weight: 700; font-size: 16px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(4px); }
+        .modal { background: white; border-radius: 16px; width: 950px; max-width: 95vw; max-height: 90vh; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: modalIn 0.3s ease-out; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, var(--primary) 0%, var(--purple) 100%); color: white; }
+        .modal-header h3 { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .modal-body { padding: 24px; overflow-y: auto; max-height: calc(90vh - 140px); }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid var(--gray-100); display: flex; justify-content: flex-end; gap: 8px; background: var(--gray-50); }
+        .close-btn { background: rgba(255,255,255,0.2); border: none; color: white; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .close-btn:hover { background: rgba(255,255,255,0.3); }
+        .profile-header { display: flex; gap: 24px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--gray-100); }
+        .profile-avatar { width: 100px; height: 100px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 700; color: white; flex-shrink: 0; }
+        .profile-info { flex: 1; }
+        .profile-info h2 { font-size: 24px; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
+        .profile-info .subtitle { font-size: 14px; color: var(--gray-500); margin-bottom: 12px; }
+        .profile-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+        .profile-badges .badge { padding: 6px 12px; font-size: 12px; }
+        .profile-stats { display: flex; gap: 24px; }
+        .profile-stat { text-align: center; }
+        .profile-stat-value { font-size: 24px; font-weight: 700; color: var(--primary); }
+        .profile-stat-label { font-size: 11px; color: var(--gray-500); text-transform: uppercase; }
+        .info-section { margin-bottom: 20px; }
+        .info-section-title { font-size: 12px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .info-item { background: var(--gray-50); padding: 12px 16px; border-radius: 10px; }
+        .info-item.full { grid-column: span 2; }
+        .info-label { font-size: 11px; color: var(--gray-500); margin-bottom: 4px; text-transform: uppercase; }
+        .info-value { font-size: 14px; font-weight: 500; color: var(--gray-800); }
+        .info-value.highlight { color: var(--primary); }
+        .info-value.danger { color: var(--danger); }
+        .terapia-card { background: linear-gradient(135deg, var(--purple-light) 0%, var(--pink-light) 100%); padding: 16px; border-radius: 12px; margin-bottom: 16px; }
+        .terapia-title { font-size: 13px; font-weight: 600; color: var(--purple); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .terapia-list { display: flex; flex-direction: column; gap: 8px; }
+        .terapia-item { display: flex; align-items: center; gap: 12px; background: white; padding: 10px 14px; border-radius: 8px; }
+        .terapia-time { font-size: 11px; font-weight: 600; color: var(--purple); background: var(--purple-light); padding: 4px 8px; border-radius: 4px; min-width: 50px; text-align: center; }
+        .terapia-name { font-size: 13px; font-weight: 500; color: var(--gray-800); flex: 1; }
+        .terapia-dose { font-size: 12px; color: var(--gray-500); }
+        .quick-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .quick-action { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: var(--gray-50); border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--gray-700); cursor: pointer; border: 1px solid var(--gray-200); transition: all 0.2s; text-decoration: none; }
+        .quick-action:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+        .quick-action svg { width: 16px; height: 16px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; } .stats-grid, .grid-2, .grid-3 { grid-template-columns: 1fr; } .modal { width: 100%; max-width: 100%; border-radius: 0; height: 100vh; max-height: 100vh; } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Icons
+        const Icons = {
+            Home: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+            Users: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+            FileText: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+            Activity: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+            Pill: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>,
+            Calendar: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+            Clock: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+            Bell: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>,
+            Search: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+            Plus: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+            Eye: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+            Edit: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+            Download: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+            Printer: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>,
+            UserCheck: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>,
+            AlertTriangle: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+            CheckCircle: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+            TrendingUp: () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
+            TrendingDown: () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>,
+            ExternalLink: () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+            X: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+            Phone: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
+        };
+
+        // Mock Data
+        const mockPazienti = [
+            { id: 1, nome: 'Teresa', cognome: 'Basile', cf: 'GMBNTL83C46G793S', stato: 'attivo', diagnosi: 'Disturbo di conversione con ritardo mentale', codiceDiagnosi: 'F44.9', struttura: 'Casa Alloggio', dataIns: '12/04/2021', dataNascita: '06/03/1983', luogoNascita: 'Polla (SA)', medico: 'Adinolfi', psichiatra: 'Dott. Barra', familiare: 'Vincenzo Mastroberti (marito)', telefono: '339 6887515', statoCivile: 'Coniugata', scolarita: 'Licenza Media', condLavorativa: 'Pensione di invalidità', conviventi: 'Marito Vincenzo con figlio minorenne (9 anni)', stanza: 3, terapia: [
+                { ora: '08:00', farmaco: 'DEPAKIN GRANULATO 750mg', dose: '1 bust.' },
+                { ora: '08:00', farmaco: 'CLOZAPINA 100mg', dose: '1/2 cpr' },
+                { ora: '08:00', farmaco: 'TAVOR 2,5MG', dose: '1 cpr' },
+                { ora: '15:00', farmaco: 'LARGACTIL 25MG', dose: '1 cpr' },
+                { ora: '21:00', farmaco: 'DEPAKIN GRANULATO 750mg', dose: '1 bust.' },
+                { ora: '21:00', farmaco: 'CLOZAPINA 100mg', dose: '1/2 cpr' },
+            ], giorniPresenza: 1325, prossimaVerifica: '30/11/2025' },
+            { id: 2, nome: 'Roberto', cognome: 'Gisoldo', cf: 'GSLRRT75M22F839K', stato: 'attivo', diagnosi: 'Schizofrenia paranoide cronica', codiceDiagnosi: 'F20.0', struttura: 'Casa Alloggio', dataIns: '05/02/2020', dataNascita: '22/08/1975', luogoNascita: 'Potenza', medico: 'Canadeo', psichiatra: 'Dott. Barra', familiare: 'Maria Gisoldo (madre)', telefono: '347 2234567', statoCivile: 'Celibe', scolarita: 'Diploma', condLavorativa: 'Pensione di invalidità', conviventi: 'Madre', stanza: 5, terapia: [
+                { ora: '08:00', farmaco: 'RISPERDAL 4MG', dose: '1 cpr' },
+                { ora: '08:00', farmaco: 'AKINETON 4MG', dose: '1 cpr' },
+                { ora: '21:00', farmaco: 'RISPERDAL 4MG', dose: '1 cpr' },
+            ], giorniPresenza: 1756, prossimaVerifica: '02/12/2025' },
+            { id: 3, nome: 'Lucia', cognome: 'Gravina', cf: 'GRVLCU68S55A794P', stato: 'attivo', diagnosi: 'Disturbo bipolare tipo I con cicli rapidi', codiceDiagnosi: 'F31.0', struttura: 'Casa Alloggio', dataIns: '18/09/2019', dataNascita: '15/11/1968', luogoNascita: 'Atella (PZ)', medico: 'Adinolfi', psichiatra: 'Dott. Barra', familiare: 'Giuseppe Gravina (figlio)', telefono: '328 9876543', statoCivile: 'Vedova', scolarita: 'Licenza Elementare', condLavorativa: 'Pensione di invalidità', conviventi: 'Figlio', stanza: 2, terapia: [
+                { ora: '08:00', farmaco: 'CARBOLITHIUM 300MG', dose: '1 cpr' },
+                { ora: '21:00', farmaco: 'OLANZAPINA 10MG', dose: '1 cpr' },
+            ], giorniPresenza: 1892, prossimaVerifica: '15/12/2025' },
+            { id: 4, nome: 'Nicola', cognome: 'Lisuoro', cf: 'LSRNCL71D12B963W', stato: 'attivo', diagnosi: 'Depressione maggiore ricorrente', codiceDiagnosi: 'F33.2', struttura: 'Gruppo App.', dataIns: '22/11/2021', dataNascita: '12/04/1971', luogoNascita: 'Melfi (PZ)', medico: 'Canadeo', psichiatra: 'Dott. Barra', familiare: 'Anna Lisuoro (figlia)', telefono: '333 5551234', statoCivile: 'Divorziato', scolarita: 'Laurea', condLavorativa: 'Pensione', conviventi: 'Solo', stanza: 1, terapia: [
+                { ora: '08:00', farmaco: 'ANAFRANIL 75MG', dose: '1 cpr' },
+                { ora: '21:00', farmaco: 'LYRICA 75MG', dose: '1 cpr' },
+            ], giorniPresenza: 1120, prossimaVerifica: '20/12/2025' },
+            { id: 5, nome: 'Francesco', cognome: 'Tomasiello', cf: 'TMSFNC65A08F052L', stato: 'attivo', diagnosi: 'Schizofrenia residua', codiceDiagnosi: 'F20.5', struttura: 'Casa Alloggio', dataIns: '03/06/2018', dataNascita: '08/01/1965', luogoNascita: 'Lauria (PZ)', medico: 'Adinolfi', psichiatra: 'Dott. Barra', familiare: 'Rosa Tomasiello (sorella)', telefono: '340 7778899', statoCivile: 'Celibe', scolarita: 'Licenza Media', condLavorativa: 'Pensione di invalidità', conviventi: 'Sorella', stanza: 7, terapia: [
+                { ora: '08:00', farmaco: 'HALDOL GOCCE', dose: '20 gtt' },
+                { ora: '21:00', farmaco: 'RIVOTRIL GOCCE', dose: '15 gtt' },
+            ], giorniPresenza: 2385, prossimaVerifica: '10/01/2026' },
+            { id: 6, nome: 'Gerardina', cognome: 'Muto', cf: 'MTUGRD82T47G942M', stato: 'attivo', diagnosi: 'Disturbo schizoaffettivo', codiceDiagnosi: 'F25.0', struttura: 'Gruppo App.', dataIns: '14/01/2022', dataNascita: '07/12/1982', luogoNascita: 'Moliterno (PZ)', medico: 'Canadeo', psichiatra: 'Dott. Barra', familiare: 'Luigi Muto (padre)', telefono: '329 4443322', statoCivile: 'Nubile', scolarita: 'Diploma', condLavorativa: 'Disoccupata', conviventi: 'Genitori', stanza: 4, terapia: [
+                { ora: '08:00', farmaco: 'OLANZAPINA 5MG', dose: '1 cpr' },
+                { ora: '21:00', farmaco: 'OLANZAPINA 10MG', dose: '1 cpr' },
+            ], giorniPresenza: 1067, prossimaVerifica: '05/01/2026' },
+            { id: 7, nome: 'Paolo', cognome: 'Pace', cf: 'PCAPLA77H15D390R', stato: 'sospeso', diagnosi: 'Disturbo borderline di personalità', codiceDiagnosi: 'F60.3', struttura: 'Casa Alloggio', dataIns: '28/07/2020', dataNascita: '15/06/1977', luogoNascita: 'Potenza', medico: 'Adinolfi', psichiatra: 'Dott. Barra', familiare: 'Carla Pace (moglie)', telefono: '338 6665544', statoCivile: 'Coniugato', scolarita: 'Diploma', condLavorativa: 'Pensione', conviventi: 'Moglie e figlio', stanza: null, terapia: [], giorniPresenza: 890, prossimaVerifica: '-' },
+            { id: 8, nome: 'Giovanni', cognome: 'Pacella', cf: 'PCLGNN69C02F839S', stato: 'attivo', diagnosi: 'Psicosi NAS con diabete', codiceDiagnosi: 'F29', struttura: 'Casa Alloggio', dataIns: '09/03/2019', dataNascita: '02/03/1969', luogoNascita: 'Potenza', medico: 'Canadeo', psichiatra: 'Dott. Barra', familiare: 'Marco Pacella (nipote)', telefono: '335 2221100', statoCivile: 'Celibe', scolarita: 'Licenza Elementare', condLavorativa: 'Pensione di invalidità', conviventi: 'Nipote', stanza: 6, terapia: [
+                { ora: '08:00', farmaco: 'RISPERDAL 2MG', dose: '1 cpr' },
+                { ora: '08:00', farmaco: 'GLUCOPHAGE 1000MG', dose: '1/2 cpr' },
+                { ora: '21:00', farmaco: 'RISPERDAL 2MG', dose: '1 cpr' },
+            ], giorniPresenza: 2089, prossimaVerifica: '28/11/2025' },
+            { id: 9, nome: 'Giuseppina', cognome: 'Parente', cf: 'PRNGPP74R50A509T', stato: 'attivo', diagnosi: 'Disturbo ossessivo-compulsivo grave', codiceDiagnosi: 'F42.2', struttura: 'Gruppo App.', dataIns: '17/05/2021', dataNascita: '10/10/1974', luogoNascita: 'Avigliano (PZ)', medico: 'Adinolfi', psichiatra: 'Dott. Barra', familiare: 'Salvatore Parente (marito)', telefono: '342 8889900', statoCivile: 'Coniugata', scolarita: 'Licenza Media', condLavorativa: 'Casalinga', conviventi: 'Marito', stanza: 2, terapia: [
+                { ora: '08:00', farmaco: 'ANAFRANIL 75MG', dose: '1 cpr' },
+                { ora: '21:00', farmaco: 'ANAFRANIL 75MG', dose: '1 cpr' },
+            ], giorniPresenza: 1310, prossimaVerifica: '22/12/2025' },
+            { id: 10, nome: 'Maria', cognome: 'Pastore', cf: 'PSTMRA66L42G793U', stato: 'attivo', diagnosi: 'Schizofrenia catatonica', codiceDiagnosi: 'F20.2', struttura: 'Casa Alloggio', dataIns: '01/12/2017', dataNascita: '02/07/1966', luogoNascita: 'Polla (SA)', medico: 'Canadeo', psichiatra: 'Dott. Barra', familiare: 'Antonio Pastore (figlio)', telefono: '349 1112233', statoCivile: 'Vedova', scolarita: 'Licenza Elementare', condLavorativa: 'Pensione', conviventi: 'Figlio', stanza: 8, terapia: [
+                { ora: '08:00', farmaco: 'CLOZAPINA 100MG', dose: '1 cpr' },
+                { ora: '21:00', farmaco: 'CLOZAPINA 100MG', dose: '1 cpr' },
+            ], giorniPresenza: 2575, prossimaVerifica: '08/12/2025' },
+            { id: 11, nome: 'Lucio', cognome: 'Riviello', cf: 'RVLLCU71R10D612R', stato: 'attivo', diagnosi: 'Disturbo delirante persistente', codiceDiagnosi: 'F22.0', struttura: 'Casa Alloggio', dataIns: '20/02/2019', dataNascita: '10/10/1971', luogoNascita: 'Potenza', medico: 'Adinolfi', psichiatra: 'Dott. Barra', familiare: 'Vincenzo Riviello (padre)', telefono: '0971 476068', statoCivile: 'Celibe', scolarita: 'Licenza Media', condLavorativa: 'Pensione di invalidità', conviventi: 'Padre', stanza: 9, terapia: [
+                { ora: '08:00', farmaco: 'RISPERDAL LIQUIDO', dose: '3ml' },
+                { ora: '21:00', farmaco: 'RISPERDAL LIQUIDO', dose: '3ml' },
+            ], giorniPresenza: 2102, prossimaVerifica: '05/12/2025' },
+            { id: 12, nome: 'Giuseppe', cognome: 'Santarsiero', cf: 'SNTGPP80P18F839X', stato: 'attivo', diagnosi: 'Schizofrenia disorganizzata', codiceDiagnosi: 'F20.1', struttura: 'Casa Alloggio', dataIns: '11/10/2020', dataNascita: '18/09/1980', luogoNascita: 'Potenza', medico: 'Canadeo', psichiatra: 'Dott. Barra', familiare: 'Teresa Santarsiero (madre)', telefono: '346 3334455', statoCivile: 'Celibe', scolarita: 'Diploma', condLavorativa: 'Pensione di invalidità', conviventi: 'Madre', stanza: 10, terapia: [
+                { ora: '08:00', farmaco: 'CLOZAPINA 25MG', dose: '2 cpr' },
+                { ora: '21:00', farmaco: 'DAPAROX 20MG', dose: '1 cpr' },
+            ], giorniPresenza: 1529, prossimaVerifica: '18/12/2025' },
+            { id: 13, nome: 'Beniamino', cognome: 'Scavone', cf: 'SCVBNM73A22G793B', stato: 'attivo', diagnosi: 'Disturbo psicotico breve ricorrente', codiceDiagnosi: 'F23.9', struttura: 'Gruppo App.', dataIns: '06/08/2021', dataNascita: '22/01/1973', luogoNascita: 'Polla (SA)', medico: 'Adinolfi', psichiatra: 'Dott. Barra', familiare: 'Angela Scavone (figlia)', telefono: '320 5556677', statoCivile: 'Divorziato', scolarita: 'Licenza Media', condLavorativa: 'Pensione', conviventi: 'Solo', stanza: 3, terapia: [
+                { ora: '08:00', farmaco: 'BRINTELLIX 5MG', dose: '1 cpr' },
+                { ora: '21:00', farmaco: 'BRINTELLIX 5MG', dose: '1 cpr' },
+            ], giorniPresenza: 1229, prossimaVerifica: '25/12/2025' },
+            { id: 14, nome: 'Giuseppe', cognome: 'Scavone', cf: 'SCVGPP58T30E512Y', stato: 'attivo', diagnosi: 'Demenza vascolare con psicosi', codiceDiagnosi: 'F01.8', struttura: 'Casa Alloggio', dataIns: '25/04/2018', dataNascita: '30/12/1958', luogoNascita: 'Lagonegro (PZ)', medico: 'Canadeo', psichiatra: 'Dott. Barra', familiare: 'Franco Scavone (fratello)', telefono: '333 8889900', statoCivile: 'Vedovo', scolarita: 'Licenza Elementare', condLavorativa: 'Pensione', conviventi: 'Fratello', stanza: 11, terapia: [
+                { ora: '08:00', farmaco: 'NEUPRO 6MG', dose: '1 cerotto' },
+                { ora: '21:00', farmaco: 'LATUDA 74MG', dose: '1 cpr' },
+            ], giorniPresenza: 2428, prossimaVerifica: '12/12/2025' },
+        ];
+
+        const mockDiario = [
+            { id: 1, data: '27/11 09:30', paziente: 'Basile T.', operatore: 'Beneventano M.', tipo: 'osservazione', testo: 'Paziente tranquilla, ha partecipato alle attività mattutine con interesse.' },
+            { id: 2, data: '27/11 08:45', paziente: 'Gisoldo R.', operatore: 'Lotrionte G.', tipo: 'terapia', testo: 'Somministrata terapia del mattino regolarmente. Nessuna resistenza.' },
+            { id: 3, data: '27/11 08:00', paziente: 'Gravina L.', operatore: 'Carbone F.', tipo: 'evento', testo: 'Richiesta visita medica per PA elevata (150/95). Contattato MMG.' },
+            { id: 4, data: '26/11 21:00', paziente: 'Riviello L.', operatore: 'Laguardia M.', tipo: 'osservazione', testo: 'Paziente agitato durante la serata. Somministrato al bisogno.' },
+            { id: 5, data: '26/11 15:30', paziente: 'Pacella G.', operatore: 'Carbone F.', tipo: 'terapia', testo: 'Glicemia pre-prandiale: 142 mg/dL. Somministrata insulina come prescritto.' },
+        ];
+
+        const mockStoricoVADO = {
+            1: { anni: ['2022', '2023', '2024', '2025'], aree: [
+                { nome: '01. Cura di sé', valori: [1, 2, 2, 3] }, { nome: '02. Cura abbigliamento', valori: [2, 2, 3, 3] },
+                { nome: '03. Cura salute fisica', valori: [1, 1, 2, 2] }, { nome: '04. Gestione salute psichica', valori: [1, 2, 2, 3] },
+                { nome: '05. Abitazione', valori: [2, 2, 3, 3] }, { nome: '06. Zona di abitazione', valori: [2, 3, 3, 4] },
+                { nome: '07. Attività quotidiane', valori: [1, 2, 2, 3] }, { nome: '08. Gestione denaro', valori: [1, 1, 2, 2] },
+                { nome: '09. Lavoro/Occupazione', valori: [0, 1, 1, 2] }, { nome: '10. Relazioni sociali', valori: [1, 2, 2, 3] },
+                { nome: '11. Tempo libero', valori: [2, 2, 3, 3] }, { nome: '12. Capacità espressive', valori: [1, 2, 2, 3] },
+            ]},
+        };
+
+        // App
+        const LucaniaCareApp = () => {
+            const [activeSection, setActiveSection] = useState('dashboard');
+            const [selectedPaziente, setSelectedPaziente] = useState(mockPazienti[0]);
+            const [showPatientModal, setShowPatientModal] = useState(false);
+            const [viewingPatient, setViewingPatient] = useState(null);
+
+            const navSections = [
+                { title: 'Principale', items: [
+                    { id: 'dashboard', icon: Icons.Home, label: 'Dashboard' },
+                    { id: 'anagrafica', icon: Icons.Users, label: 'Anagrafica Utenti', badge: 14 },
+                    { id: 'pei', icon: Icons.FileText, label: 'Gestione PEI' },
+                    { id: 'diario', icon: Icons.Activity, label: 'Diario Clinico' },
+                ]},
+                { title: 'Area Clinica', items: [{ id: 'clinical', icon: Icons.Pill, label: 'Farmaci & Parametri', external: true, href: 'lucania-care-v3-clinical.html' }]},
+                { title: 'Area Educativa', items: [{ id: 'education', icon: Icons.Calendar, label: 'Educativa & Relazioni', external: true, href: 'lucania-care-v3-education.html' }]},
+                { title: 'Gestione', items: [
+                    { id: 'verifiche', icon: Icons.Calendar, label: 'Verifiche Trimestrali', external: true, href: 'lucania-care-v3-verifiche.html' },
+                    { id: 'management', icon: Icons.Clock, label: 'Turni & Medici', external: true, href: 'lucania-care-v3-management.html' },
+                ]},
+            ];
+
+            const openPatientView = (paziente) => { setViewingPatient(paziente); setShowPatientModal(true); };
+
+            const renderContent = () => {
+                switch (activeSection) {
+                    case 'dashboard': return <DashboardSection />;
+                    case 'anagrafica': return <AnagraficaSection onViewPatient={openPatientView} />;
+                    case 'pei': return <PEISection paziente={selectedPaziente} onSelectPaziente={setSelectedPaziente} />;
+                    case 'diario': return <DiarioSection />;
+                    default: return <DashboardSection />;
+                }
+            };
+
+            const titles = { dashboard: { t: 'Dashboard', d: 'Panoramica Casa Alloggio BenEssere' }, anagrafica: { t: 'Anagrafica Utenti', d: 'Gestione pazienti e dati anagrafici' }, pei: { t: 'Gestione PEI', d: 'Piani Educativi Individualizzati e Storico VADO-AR' }, diario: { t: 'Diario Clinico', d: 'Registrazioni e consegne operative' } };
+
+            return (
+                <div className="app-container">
+                    <aside className="sidebar">
+                        <div className="sidebar-header"><div className="sidebar-logo"><div className="logo-icon">LC</div><div className="logo-text"><h1>Lucania-Care</h1><span>BenEssere Cooperativa v3.0</span></div></div></div>
+                        <nav>{navSections.map((section, idx) => (<div key={idx} className="nav-section"><div className="nav-section-title">{section.title}</div>{section.items.map(item => (item.external ? (<a key={item.id} href={item.href} className="nav-item"><item.icon /><span>{item.label}</span><span className="nav-external"><Icons.ExternalLink /></span></a>) : (<div key={item.id} className={`nav-item ${activeSection === item.id ? 'active' : ''}`} onClick={() => setActiveSection(item.id)}><item.icon /><span>{item.label}</span>{item.badge && <span className="nav-badge">{item.badge}</span>}</div>)))}</div>))}</nav>
+                    </aside>
+                    <main className="main-content">
+                        <header className="header"><div className="header-title"><h2>{titles[activeSection]?.t || 'Sezione'}</h2><p>{titles[activeSection]?.d || ''}</p></div><div className="header-actions"><div className="search-box"><Icons.Search /><input type="text" placeholder="Cerca paziente..." /></div><button className="notification-btn"><Icons.Bell /><span className="notification-dot"></span></button><div className="user-menu"><div className="user-avatar">MB</div><div className="user-info"><span>Michele B.</span><small>Coordinatore</small></div></div></div></header>
+                        <div className="content fade-in">{renderContent()}</div>
+                    </main>
+                    {showPatientModal && viewingPatient && <PatientModal patient={viewingPatient} onClose={() => setShowPatientModal(false)} />}
+                </div>
+            );
+        };
+
+        // Patient Modal
+        const PatientModal = ({ patient, onClose }) => {
+            const getAvatarColor = (nome) => { const colors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#14b8a6', '#ec4899']; return colors[nome.charCodeAt(0) % colors.length]; };
+            const calcAnniPresenza = () => { const anni = Math.floor(patient.giorniPresenza / 365); const mesi = Math.floor((patient.giorniPresenza % 365) / 30); return `${anni}a ${mesi}m`; };
+
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header"><h3>👤 Scheda Paziente</h3><button className="close-btn" onClick={onClose}><Icons.X /></button></div>
+                        <div className="modal-body">
+                            <div className="profile-header">
+                                <div className="profile-avatar" style={{background: `linear-gradient(135deg, ${getAvatarColor(patient.nome)} 0%, ${getAvatarColor(patient.cognome)} 100%)`}}>{patient.cognome.charAt(0)}{patient.nome.charAt(0)}</div>
+                                <div className="profile-info">
+                                    <h2>{patient.cognome} {patient.nome}</h2>
+                                    <div className="subtitle">ID: {patient.id} • C.F.: {patient.cf}</div>
+                                    <div className="profile-badges">
+                                        <span className={`badge badge-${patient.stato === 'attivo' ? 'success' : 'warning'}`}>{patient.stato === 'attivo' ? '● Attivo' : '⏸ Sospeso'}</span>
+                                        <span className="badge badge-primary">{patient.struttura}</span>
+                                        {patient.stanza && <span className="badge badge-gray">Stanza {patient.stanza}</span>}
+                                    </div>
+                                </div>
+                                <div className="profile-stats"><div className="profile-stat"><div className="profile-stat-value">{patient.giorniPresenza}</div><div className="profile-stat-label">Giorni</div></div><div className="profile-stat"><div className="profile-stat-value">{calcAnniPresenza()}</div><div className="profile-stat-label">In struttura</div></div></div>
+                            </div>
+                            <div className="grid-2">
+                                <div>
+                                    <div className="info-section"><div className="info-section-title">📋 Dati Anagrafici</div><div className="info-grid"><div className="info-item"><div className="info-label">Data di Nascita</div><div className="info-value">{patient.dataNascita}</div></div><div className="info-item"><div className="info-label">Luogo di Nascita</div><div className="info-value">{patient.luogoNascita}</div></div><div className="info-item"><div className="info-label">Stato Civile</div><div className="info-value">{patient.statoCivile}</div></div><div className="info-item"><div className="info-label">Scolarità</div><div className="info-value">{patient.scolarita}</div></div><div className="info-item full"><div className="info-label">Condizione Lavorativa</div><div className="info-value">{patient.condLavorativa}</div></div><div className="info-item full"><div className="info-label">Conviventi</div><div className="info-value">{patient.conviventi}</div></div></div></div>
+                                    <div className="info-section"><div className="info-section-title">🧠 Dati Clinici</div><div className="info-grid"><div className="info-item full"><div className="info-label">Diagnosi</div><div className="info-value danger">{patient.diagnosi}</div></div><div className="info-item"><div className="info-label">Codice ICD-10</div><div className="info-value highlight">{patient.codiceDiagnosi}</div></div><div className="info-item"><div className="info-label">Data Inserimento</div><div className="info-value">{patient.dataIns}</div></div></div></div>
+                                    <div className="info-section"><div className="info-section-title">📞 Riferimenti</div><div className="info-grid"><div className="info-item full"><div className="info-label">Familiare di Riferimento</div><div className="info-value">{patient.familiare}</div></div><div className="info-item"><div className="info-label">Telefono Familiare</div><div className="info-value highlight">{patient.telefono}</div></div><div className="info-item"><div className="info-label">MMG</div><div className="info-value">Dott. {patient.medico}</div></div><div className="info-item full"><div className="info-label">Psichiatra DSM</div><div className="info-value">{patient.psichiatra}</div></div></div></div>
+                                </div>
+                                <div>
+                                    {patient.terapia && patient.terapia.length > 0 && (<div className="terapia-card"><div className="terapia-title">💊 Terapia Farmacologica Attuale</div><div className="terapia-list">{patient.terapia.map((t, i) => (<div key={i} className="terapia-item"><div className="terapia-time">{t.ora}</div><div className="terapia-name">{t.farmaco}</div><div className="terapia-dose">{t.dose}</div></div>))}</div></div>)}
+                                    <div className="info-section"><div className="info-section-title">📅 Scadenze PEI</div><div className="info-grid"><div className="info-item full"><div className="info-label">Prossima Verifica Trimestrale</div><div className="info-value highlight">{patient.prossimaVerifica}</div></div></div></div>
+                                    <div className="info-section"><div className="info-section-title">⚡ Azioni Rapide</div><div className="quick-actions"><a className="quick-action" href={`lucania-care-v3-clinical.html?id=${patient.id}`}><Icons.Pill /> Scheda Farmaci</a><a className="quick-action" href={`lucania-care-v3-pei-editor.html?id=${patient.id}`}><Icons.FileText /> Apri PEI</a><a className="quick-action" href="#"><Icons.Activity /> Diario Clinico</a><a className="quick-action" href={`lucania-care-v3-education.html?id=${patient.id}`}><Icons.UserCheck /> Relazione Sociale</a><a className="quick-action" href="#"><Icons.Printer /> Stampa Scheda</a><a className="quick-action" href={`tel:${patient.telefono.replace(/\s/g, '')}`}><Icons.Phone /> Chiama Familiare</a></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="modal-footer"><button className="btn btn-secondary" onClick={onClose}>Chiudi</button><button className="btn btn-primary"><Icons.Edit /> Modifica Anagrafica</button></div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Dashboard
+        const DashboardSection = () => (
+            <><div className="stats-grid"><div className="stat-card primary"><div className="stat-icon primary">👥</div><div className="stat-value">14</div><div className="stat-label">Utenti attivi</div><div className="stat-change up"><Icons.TrendingUp /> +2 questo mese</div></div><div className="stat-card success"><div className="stat-icon success"><Icons.CheckCircle /></div><div className="stat-value">98%</div><div className="stat-label">Terapie somministrate</div><div className="stat-change up"><Icons.TrendingUp /> +3%</div></div><div className="stat-card warning"><div className="stat-icon warning"><Icons.AlertTriangle /></div><div className="stat-value">5</div><div className="stat-label">Farmaci in esaurimento</div><div className="stat-change down"><Icons.TrendingDown /> Riordino urgente</div></div><div className="stat-card danger"><div className="stat-icon danger"><Icons.Clock /></div><div className="stat-value">3</div><div className="stat-label">Verifiche PEI scadute</div></div></div>
+            <div className="grid-2"><div className="card"><div className="card-header"><h3>📋 Attività Recenti - Diario Clinico</h3><button className="btn btn-sm btn-secondary">Vedi tutto</button></div><div className="card-body"><div className="timeline">{mockDiario.slice(0, 4).map(item => (<div key={item.id} className="timeline-item"><div className="timeline-dot" style={{background: item.tipo === 'terapia' ? 'var(--success)' : item.tipo === 'evento' ? 'var(--danger)' : 'var(--primary)'}}></div><div className="timeline-content"><div className="timeline-time">{item.data}</div><div className="timeline-title">{item.paziente} • {item.operatore}</div><div className="timeline-text">{item.testo}</div></div></div>))}</div></div></div>
+            <div className="card"><div className="card-header"><h3>⚠️ Alert e Scadenze</h3></div><div className="card-body"><table><thead><tr><th>Tipo</th><th>Descrizione</th><th>Scadenza</th></tr></thead><tbody><tr><td><span className="badge badge-danger">Farmaco</span></td><td>AKINETON 4MG - scorta minima</td><td>Urgente</td></tr><tr><td><span className="badge badge-warning">PEI</span></td><td>Verifica trimestrale Basile T.</td><td>30/11/2025</td></tr><tr><td><span className="badge badge-warning">PEI</span></td><td>Verifica trimestrale Gisoldo R.</td><td>02/12/2025</td></tr><tr><td><span className="badge badge-danger">Farmaco</span></td><td>HALDOL GOCCE - scadenza vicina</td><td>30/12/2024</td></tr><tr><td><span className="badge badge-primary">Visita</span></td><td>Controllo psichiatrico Riviello L.</td><td>05/12/2025</td></tr></tbody></table></div></div></div></>
+        );
+
+        // Anagrafica
+        const AnagraficaSection = ({ onViewPatient }) => {
+            const [filter, setFilter] = useState('tutti');
+            const filtered = filter === 'tutti' ? mockPazienti : mockPazienti.filter(p => p.stato === filter);
+            return (
+                <><div className="stats-grid"><div className="stat-card primary"><div className="stat-icon primary">👥</div><div className="stat-value">{mockPazienti.length}</div><div className="stat-label">Totali</div></div><div className="stat-card success"><div className="stat-icon success">✓</div><div className="stat-value">{mockPazienti.filter(p => p.stato === 'attivo').length}</div><div className="stat-label">Attivi</div></div><div className="stat-card warning"><div className="stat-icon warning">⏸</div><div className="stat-value">{mockPazienti.filter(p => p.stato === 'sospeso').length}</div><div className="stat-label">Sospesi</div></div><div className="stat-card cyan"><div className="stat-icon cyan">🏠</div><div className="stat-value">{mockPazienti.filter(p => p.struttura === 'Casa Alloggio').length}</div><div className="stat-label">Casa Alloggio</div></div></div>
+                <div className="card"><div className="card-header"><h3>👥 Elenco Pazienti</h3><div style={{display: 'flex', gap: 8}}><select className="form-select" style={{width: 150}} value={filter} onChange={e => setFilter(e.target.value)}><option value="tutti">Tutti</option><option value="attivo">Attivi</option><option value="sospeso">Sospesi</option></select><button className="btn btn-primary"><Icons.Plus /> Nuovo Paziente</button></div></div><div className="card-body" style={{padding: 0}}><table><thead><tr><th>ID</th><th>Cognome Nome</th><th>Codice Fiscale</th><th>Struttura</th><th>Stato</th><th>Diagnosi</th><th>Azioni</th></tr></thead><tbody>{filtered.map(p => (<tr key={p.id}><td>{p.id}</td><td style={{fontWeight: 600}}>{p.cognome} {p.nome}</td><td style={{fontSize: 10, fontFamily: 'monospace'}}>{p.cf}</td><td><span className="badge badge-primary">{p.struttura}</span></td><td><span className={`badge badge-${p.stato === 'attivo' ? 'success' : 'warning'}`}>{p.stato}</span></td><td style={{fontSize: 11, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{p.diagnosi}</td><td><button className="btn btn-sm btn-cyan" style={{marginRight: 4}} onClick={() => onViewPatient(p)} title="Visualizza scheda paziente"><Icons.Eye /></button><button className="btn btn-sm btn-primary" title="Modifica"><Icons.Edit /></button></td></tr>))}</tbody></table></div></div></>
+            );
+        };
+
+        // PEI
+        const PEISection = ({ paziente, onSelectPaziente }) => {
+            const storico = mockStoricoVADO[paziente.id] || mockStoricoVADO[1];
+            const getTrend = (valori) => valori[3] > valori[2] ? 'up' : valori[3] < valori[2] ? 'down' : 'stable';
+            return (
+                <><div className="stats-grid"><div className="stat-card cyan"><div className="stat-icon cyan">📄</div><div className="stat-value">{mockPazienti.filter(p => p.stato === 'attivo').length}</div><div className="stat-label">PEI Attivi</div></div><div className="stat-card warning"><div className="stat-icon warning">⏰</div><div className="stat-value">3</div><div className="stat-label">Verifiche in scadenza</div></div><div className="stat-card success"><div className="stat-icon success">✓</div><div className="stat-value">11</div><div className="stat-label">Aggiornati</div></div><div className="stat-card teal"><div className="stat-icon teal">📊</div><div className="stat-value">4</div><div className="stat-label">Anni storico</div></div></div>
+                <div className="card"><div className="card-header"><h3>📋 Seleziona Utente per PEI</h3><select className="form-select" style={{width: 300}} value={paziente.id} onChange={e => onSelectPaziente(mockPazienti.find(p => p.id === parseInt(e.target.value)))}>{mockPazienti.map(p => (<option key={p.id} value={p.id}>{p.cognome} {p.nome} - {p.struttura}</option>))}</select></div></div>
+                <div className="card"><div className="card-header"><h3>PEI - {paziente.cognome} {paziente.nome} <span className={`badge badge-${paziente.stato === 'attivo' ? 'success' : 'warning'}`}>{paziente.stato}</span></h3><div style={{display: 'flex', gap: 6}}><a href={`lucania-care-v3-verifiche.html?id=${paziente.id}`} className="btn btn-warning"><Icons.Calendar /> Verifiche</a><button className="btn btn-secondary"><Icons.Download /> PDF</button><a href={`lucania-care-v3-pei-editor.html?id=${paziente.id}`} className="btn btn-primary"><Icons.Edit /> Modifica PEI</a></div></div><div className="card-body"><div className="grid-2" style={{marginBottom: 20}}><div style={{background: 'var(--gray-50)', padding: 16, borderRadius: 10}}><h4 style={{marginBottom: 10, fontSize: 14}}>📋 Dati Anagrafici</h4><p style={{fontSize: 13, marginBottom: 4}}><strong>Nome:</strong> {paziente.cognome} {paziente.nome}</p><p style={{fontSize: 13, marginBottom: 4}}><strong>C.F.:</strong> {paziente.cf}</p><p style={{fontSize: 13, marginBottom: 4}}><strong>Diagnosi:</strong> {paziente.diagnosi}</p><p style={{fontSize: 13, marginBottom: 4}}><strong>Familiare:</strong> {paziente.familiare}</p><p style={{fontSize: 13}}><strong>Data Inserimento:</strong> {paziente.dataIns}</p></div><div style={{background: 'var(--primary-light)', padding: 16, borderRadius: 10}}><h4 style={{marginBottom: 10, fontSize: 14}}>🎯 Obiettivi PEI</h4><p style={{fontSize: 13, marginBottom: 4}}><strong>Breve termine:</strong> Aumentare consapevolezza sulla cura dell'ambiente di vita.</p><p style={{fontSize: 13, marginBottom: 4}}><strong>Medio termine:</strong> Migliorare autonomia personale e capacità di interazione.</p><p style={{fontSize: 13}}><strong>Lungo termine:</strong> Consolidare l'indipendenza nelle attività quotidiane.</p></div></div><h4 style={{marginBottom: 12, fontSize: 14}}>📈 Storico VADO-AR (2022-2025)</h4><p style={{fontSize: 12, color: 'var(--gray-500)', marginBottom: 12}}>Valutazione Aree e Obiettivi - Scala: 0=Assente, 1=Nessun intervento, 2=Progettazione, 3=In corso, 4=Concluso</p><table className="storico-table"><thead><tr><th style={{textAlign: 'left'}}>Area VADO-AR</th>{storico.anni.map(anno => <th key={anno} className="year-header">{anno}</th>)}<th>Trend</th></tr></thead><tbody>{storico.aree.map((area, i) => (<tr key={i}><td className="area-name">{area.nome}</td>{area.valori.map((v, j) => (<td key={j} className={`valore-${v}`}>{v}</td>))}<td className={`trend-${getTrend(area.valori)}`}>{getTrend(area.valori) === 'up' ? '↑' : getTrend(area.valori) === 'down' ? '↓' : '→'}</td></tr>))}</tbody></table><div style={{marginTop: 16, padding: 12, background: 'var(--success-light)', borderRadius: 8}}><strong style={{fontSize: 13}}>📊 Riepilogo:</strong><span style={{fontSize: 12, marginLeft: 8}}>Miglioramenti in {storico.aree.filter(a => getTrend(a.valori) === 'up').length} aree • Stabili {storico.aree.filter(a => getTrend(a.valori) === 'stable').length} aree • In calo {storico.aree.filter(a => getTrend(a.valori) === 'down').length} aree</span></div></div></div></>
+            );
+        };
+
+        // Diario
+        const DiarioSection = () => (
+            <><div className="card"><div className="card-header"><h3>✏️ Nuova Registrazione</h3></div><div className="card-body"><div className="grid-3" style={{marginBottom: 12}}><select className="form-select"><option>Seleziona paziente...</option>{mockPazienti.filter(p => p.stato === 'attivo').map(p => (<option key={p.id}>{p.cognome} {p.nome}</option>))}</select><input type="datetime-local" className="form-input" /><select className="form-select"><option>Tipo registrazione...</option><option>Consegna</option><option>Osservazione</option><option>Terapia</option><option>Evento critico</option></select></div><textarea className="form-textarea" placeholder="Descrizione della registrazione..." style={{marginBottom: 12}}></textarea><button className="btn btn-primary"><Icons.Plus /> Salva Registrazione</button></div></div>
+            <div className="card"><div className="card-header"><h3>📋 Ultime Registrazioni</h3><button className="btn btn-sm btn-secondary"><Icons.Printer /> Stampa</button></div><div className="card-body" style={{padding: 0}}><table><thead><tr><th>Data/Ora</th><th>Paziente</th><th>Descrizione</th><th>Operatore</th><th>Tipo</th></tr></thead><tbody>{mockDiario.map(d => (<tr key={d.id}><td style={{whiteSpace: 'nowrap'}}>{d.data}</td><td style={{fontWeight: 500}}>{d.paziente}</td><td>{d.testo}</td><td>{d.operatore}</td><td><span className={`badge badge-${d.tipo === 'evento' ? 'danger' : d.tipo === 'terapia' ? 'success' : 'primary'}`}>{d.tipo}</span></td></tr>))}</tbody></table></div></div></>
+        );
+
+        ReactDOM.render(<LucaniaCareApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
