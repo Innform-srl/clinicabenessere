@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucania-Care v3.0 - Educativa & Relazioni</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb; --primary-dark: #1d4ed8; --primary-light: #dbeafe;
+            --success: #10b981; --success-light: #d1fae5;
+            --warning: #f59e0b; --warning-light: #fef3c7;
+            --danger: #ef4444; --danger-light: #fee2e2;
+            --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+            --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280;
+            --gray-600: #4b5563; --gray-700: #374151; --gray-800: #1f2937; --gray-900: #111827;
+            --purple: #8b5cf6; --purple-light: #ede9fe;
+            --cyan: #06b6d4; --cyan-light: #cffafe;
+            --teal: #14b8a6; --teal-light: #ccfbf1;
+            --indigo: #6366f1; --indigo-light: #e0e7ff;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--gray-50); color: var(--gray-800); }
+        .app-container { display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background: linear-gradient(180deg, var(--gray-900) 0%, var(--gray-800) 100%); color: white; padding: 16px 0; position: fixed; height: 100vh; overflow-y: auto; z-index: 100; }
+        .sidebar-header { padding: 0 16px 16px; border-bottom: 1px solid var(--gray-700); margin-bottom: 16px; }
+        .sidebar-logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary) 0%, var(--cyan) 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+        .logo-text h1 { font-size: 16px; font-weight: 700; color: white; }
+        .logo-text span { font-size: 10px; color: var(--gray-400); }
+        .nav-section { margin-bottom: 20px; }
+        .nav-section-title { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--gray-500); padding: 0 16px; margin-bottom: 6px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: var(--gray-400); cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; font-size: 13px; text-decoration: none; }
+        .nav-item:hover { background: var(--gray-700); color: white; }
+        .nav-item.active { background: rgba(37, 99, 235, 0.15); color: var(--primary); border-left-color: var(--primary); }
+        .nav-item svg { width: 18px; height: 18px; }
+        .nav-external { font-size: 9px; color: var(--gray-500); margin-left: auto; }
+        .main-content { flex: 1; margin-left: 260px; min-height: 100vh; }
+        .header { background: white; padding: 14px 24px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+        .header-title h2 { font-size: 18px; font-weight: 600; color: var(--gray-900); }
+        .header-title p { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+        .search-box { display: flex; align-items: center; gap: 8px; background: var(--gray-100); padding: 8px 14px; border-radius: 8px; width: 240px; }
+        .search-box input { border: none; background: transparent; outline: none; flex: 1; font-size: 13px; }
+        .notification-btn { position: relative; width: 38px; height: 38px; border-radius: 8px; background: var(--gray-100); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .notification-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; border: 2px solid white; }
+        .user-menu { display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; background: var(--gray-100); border-radius: 8px; cursor: pointer; }
+        .user-avatar { width: 30px; height: 30px; border-radius: 6px; background: linear-gradient(135deg, var(--purple) 0%, var(--indigo) 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 12px; }
+        .user-info span { font-size: 13px; font-weight: 500; color: var(--gray-700); }
+        .user-info small { font-size: 10px; color: var(--gray-500); display: block; }
+        .content { padding: 20px 24px; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 16px; overflow: hidden; }
+        .card-header { padding: 14px 16px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: space-between; }
+        .card-header h3 { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+        .card-body { padding: 16px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+        .stat-card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .stat-card.primary { border-left: 4px solid var(--primary); }
+        .stat-card.success { border-left: 4px solid var(--success); }
+        .stat-card.warning { border-left: 4px solid var(--warning); }
+        .stat-card.danger { border-left: 4px solid var(--danger); }
+        .stat-card.purple { border-left: 4px solid var(--purple); }
+        .stat-card.cyan { border-left: 4px solid var(--cyan); }
+        .stat-card.teal { border-left: 4px solid var(--teal); }
+        .stat-card.indigo { border-left: 4px solid var(--indigo); }
+        .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 10px; }
+        .stat-icon.primary { background: var(--primary-light); color: var(--primary); }
+        .stat-icon.success { background: var(--success-light); color: var(--success); }
+        .stat-icon.warning { background: var(--warning-light); color: var(--warning); }
+        .stat-icon.purple { background: var(--purple-light); color: var(--purple); }
+        .stat-icon.cyan { background: var(--cyan-light); color: var(--cyan); }
+        .stat-icon.indigo { background: var(--indigo-light); color: var(--indigo); }
+        .stat-value { font-size: 24px; font-weight: 700; color: var(--gray-900); }
+        .stat-label { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+        .stat-change { font-size: 11px; margin-top: 6px; }
+        .stat-change.up { color: var(--success); }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--gray-100); }
+        th { background: var(--gray-50); font-weight: 600; color: var(--gray-600); font-size: 11px; text-transform: uppercase; }
+        tr:hover { background: var(--gray-50); }
+        .form-select, .form-input, .form-textarea { padding: 8px 12px; border: 1px solid var(--gray-200); border-radius: 6px; font-size: 13px; width: 100%; background: white; }
+        .form-select:focus, .form-input:focus, .form-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+        .form-textarea { min-height: 80px; resize: vertical; font-family: inherit; }
+        .form-group { margin-bottom: 14px; }
+        .form-label { display: block; font-size: 12px; font-weight: 500; color: var(--gray-700); margin-bottom: 6px; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: var(--gray-100); color: var(--gray-700); }
+        .btn-secondary:hover { background: var(--gray-200); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-purple { background: var(--purple); color: white; }
+        .btn-cyan { background: var(--cyan); color: white; }
+        .btn-indigo { background: var(--indigo); color: white; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
+        .btn-outline { background: transparent; border: 1px solid var(--gray-300); color: var(--gray-700); }
+        .btn-outline:hover { background: var(--gray-100); }
+        .badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+        .badge-primary { background: var(--primary-light); color: var(--primary); }
+        .badge-success { background: var(--success-light); color: var(--success); }
+        .badge-warning { background: var(--warning-light); color: var(--warning); }
+        .badge-purple { background: var(--purple-light); color: var(--purple); }
+        .badge-cyan { background: var(--cyan-light); color: var(--cyan); }
+        .badge-gray { background: var(--gray-100); color: var(--gray-600); }
+        .badge-indigo { background: var(--indigo-light); color: var(--indigo); }
+        .tabs { display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap; }
+        .tab { padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; background: var(--gray-100); color: var(--gray-600); cursor: pointer; border: none; transition: all 0.2s; }
+        .tab:hover { background: var(--gray-200); }
+        .tab.active { background: var(--primary); color: white; }
+        .activity-item { display: flex; gap: 14px; padding: 14px; border-radius: 8px; background: var(--gray-50); margin-bottom: 10px; transition: all 0.2s; }
+        .activity-item:hover { background: var(--gray-100); }
+        .activity-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .activity-content { flex: 1; }
+        .activity-title { font-size: 14px; font-weight: 600; color: var(--gray-800); margin-bottom: 4px; }
+        .activity-desc { font-size: 12px; color: var(--gray-600); margin-bottom: 6px; }
+        .activity-meta { display: flex; gap: 12px; font-size: 11px; color: var(--gray-500); }
+        .relation-card { background: white; border: 1px solid var(--gray-200); border-radius: 10px; padding: 14px; transition: all 0.2s; }
+        .relation-card:hover { border-color: var(--primary); box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15); }
+        .relation-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .relation-type { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-500); }
+        .relation-name { font-size: 14px; font-weight: 600; color: var(--gray-800); margin-top: 2px; }
+        .relation-body { font-size: 12px; color: var(--gray-600); margin-bottom: 10px; }
+        .relation-footer { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--gray-500); }
+        .project-card { background: white; border-radius: 12px; padding: 16px; border: 1px solid var(--gray-200); }
+        .project-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .project-title { font-size: 15px; font-weight: 600; color: var(--gray-800); }
+        .project-period { font-size: 11px; color: var(--gray-500); margin-top: 4px; }
+        .progress-bar { height: 6px; background: var(--gray-200); border-radius: 3px; overflow: hidden; margin: 10px 0; }
+        .progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+        .progress-text { font-size: 11px; color: var(--gray-500); display: flex; justify-content: space-between; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s; }
+        .modal-overlay.open { opacity: 1; visibility: visible; }
+        .modal { background: white; border-radius: 12px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; transform: scale(0.9); transition: transform 0.3s; }
+        .modal-overlay.open .modal { transform: scale(1); }
+        .modal-header { padding: 16px 20px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { font-size: 16px; font-weight: 600; }
+        .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gray-400); }
+        .modal-body { padding: 20px; }
+        .modal-footer { padding: 16px 20px; border-top: 1px solid var(--gray-200); display: flex; justify-content: flex-end; gap: 10px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; } .stats-grid, .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Icons
+        const Icons = {
+            Home: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+            Users: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+            FileText: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+            Activity: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+            Pill: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>,
+            Calendar: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+            Clock: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+            Bell: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>,
+            Search: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+            Plus: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+            Eye: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+            Edit: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+            Download: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+            Printer: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>,
+            ExternalLink: () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+            Phone: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
+            Mail: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>,
+            X: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+            Clipboard: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>,
+            UserPlus: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>,
+        };
+
+        // Mock Data
+        const mockPazienti = [
+            { id: 1, nome: 'Teresa', cognome: 'Basile' },
+            { id: 2, nome: 'Roberto', cognome: 'Gisoldo' },
+            { id: 3, nome: 'Lucia', cognome: 'Gravina' },
+            { id: 4, nome: 'Nicola', cognome: 'Lisuoro' },
+            { id: 5, nome: 'Francesco', cognome: 'Tomasiello' },
+            { id: 6, nome: 'Gerardina', cognome: 'Muto' },
+            { id: 7, nome: 'Paolo', cognome: 'Pace' },
+            { id: 8, nome: 'Giovanni', cognome: 'Pacella' },
+        ];
+
+        const mockRelazioniSociali = [
+            { id: 1, paziente: 'Basile Teresa', tipo: 'Familiare', nome: 'Vincenzo Mastroberti', parentela: 'Marito', telefono: '339 6887515', ultimoContatto: '15/12/2024', frequenza: 'Settimanale', note: 'Visita ogni domenica. Collaborativo.' },
+            { id: 2, paziente: 'Basile Teresa', tipo: 'Familiare', nome: 'Luca Mastroberti', parentela: 'Figlio', telefono: '345 8876543', ultimoContatto: '10/12/2024', frequenza: 'Quindicinale', note: 'Minorenne. Visite accompagnate.' },
+            { id: 3, paziente: 'Gisoldo Roberto', tipo: 'Familiare', nome: 'Maria Gisoldo', parentela: 'Madre', telefono: '347 2234567', ultimoContatto: '12/12/2024', frequenza: 'Settimanale', note: 'Anziana. Contatti telefonici.' },
+            { id: 4, paziente: 'Gravina Lucia', tipo: 'Familiare', nome: 'Giuseppe Gravina', parentela: 'Figlio', telefono: '328 9876543', ultimoContatto: '18/12/2024', frequenza: 'Mensile', note: 'Vive a Milano.' },
+            { id: 5, paziente: 'Tomasiello Francesco', tipo: 'Familiare', nome: 'Rosa Tomasiello', parentela: 'Sorella', telefono: '340 7778899', ultimoContatto: '14/12/2024', frequenza: 'Bisettimanale', note: 'Referente principale.' },
+            { id: 6, paziente: 'Pacella Giovanni', tipo: 'Familiare', nome: 'Anna Pacella', parentela: 'Figlia', telefono: '333 5551234', ultimoContatto: '16/12/2024', frequenza: 'Settimanale', note: 'Gestisce aspetti amministrativi.' },
+        ];
+
+        const mockRelazioniTerritorio = [
+            { id: 1, tipo: 'DSM', ente: 'DSM ASP Potenza', referente: 'Dr. Andrea Barra', ruolo: 'Psichiatra referente', telefono: '0971 123456', email: 'a.barra@asp.basilicata.it', ultimoContatto: '17/12/2024', note: 'Riunione équipe mensile.' },
+            { id: 2, tipo: 'DSM', ente: 'DSM ASP Potenza', referente: 'Dr.ssa Francesca Giordano', ruolo: 'Psichiatra', telefono: '0971 123457', email: 'f.giordano@asp.basilicata.it', ultimoContatto: '10/12/2024', note: 'Prescrizioni farmacologiche.' },
+            { id: 3, tipo: 'Servizi Sociali', ente: 'Comune di Potenza', referente: 'Dr.ssa Sanna Maria', ruolo: 'Assistente Sociale', telefono: '0971 987654', email: 'm.sanna@comune.potenza.it', ultimoContatto: '05/12/2024', note: 'Progetto inserimento lavorativo.' },
+            { id: 4, tipo: 'Associazione', ente: 'Ass. Volontari Potentini', referente: 'Marco Rossi', ruolo: 'Presidente', telefono: '339 4445566', email: 'info@volontaripz.it', ultimoContatto: '20/11/2024', note: 'Attività esterne.' },
+        ];
+
+        const mockLaboratori = [
+            { id: 1, nome: 'Laboratorio Cucina', descrizione: 'Preparazione pasti', giorno: 'Martedì', orario: '10:00-12:00', educatore: 'Beneventano M.', partecipanti: ['Basile T.', 'Gravina L.', 'Muto G.', 'Pacella G.'], stato: 'attivo', obiettivo: 'Autonomia pasti' },
+            { id: 2, nome: 'Laboratorio Artistico', descrizione: 'Pittura e disegno', giorno: 'Mercoledì', orario: '15:00-17:00', educatore: 'Lotrionte A.', partecipanti: ['Gisoldo R.', 'Tomasiello F.', 'Pace P.'], stato: 'attivo', obiettivo: 'Espressione creativa' },
+            { id: 3, nome: 'Laboratorio Musicale', descrizione: 'Ascolto guidato e ritmica', giorno: 'Giovedì', orario: '16:00-17:30', educatore: 'Carbone S.', partecipanti: ['Basile T.', 'Gisoldo R.', 'Lisuoro N.'], stato: 'attivo', obiettivo: 'Rilassamento' },
+            { id: 4, nome: 'Laboratorio Orto', descrizione: 'Giardinaggio', giorno: 'Lunedì', orario: '09:30-11:30', educatore: 'Laguardia R.', partecipanti: ['Tomasiello F.', 'Pacella G.', 'Muto G.', 'Lisuoro N.'], stato: 'attivo', obiettivo: 'Attività fisica' },
+            { id: 5, nome: 'Gruppo Discussione', descrizione: 'Condivisione settimanale', giorno: 'Venerdì', orario: '11:00-12:00', educatore: 'Beneventano M.', partecipanti: ['Tutti'], stato: 'attivo', obiettivo: 'Comunicazione' },
+        ];
+
+        const mockAttivitaMensili = [
+            { id: 1, mese: 'Dicembre 2024', attivita: 'Laboratorio Cucina', sessioni: 4, partecipazioni: 16, note: 'Pranzo di Natale. Ottima partecipazione.', valutazione: 'Eccellente' },
+            { id: 2, mese: 'Dicembre 2024', attivita: 'Laboratorio Artistico', sessioni: 4, partecipazioni: 10, note: 'Addobbi natalizi.', valutazione: 'Buono' },
+            { id: 3, mese: 'Dicembre 2024', attivita: 'Laboratorio Orto', sessioni: 3, partecipazioni: 9, note: 'Ortaggi invernali.', valutazione: 'Buono' },
+            { id: 4, mese: 'Dicembre 2024', attivita: 'Uscita Culturale', sessioni: 2, partecipazioni: 12, note: 'Mercatini Natale.', valutazione: 'Eccellente' },
+        ];
+
+        const mockProgetti = [
+            { id: 1, titolo: 'Autonomia Abitativa', descrizione: 'Gestione autonoma appartamento', paziente: 'Basile Teresa', dataInizio: '01/09/2024', dataFine: '31/08/2025', obiettivi: ['Gestione spesa', 'Pulizia', 'Preparazione pasti'], progresso: 45, stato: 'in_corso', referente: 'Beneventano M.' },
+            { id: 2, titolo: 'Reinserimento Sociale', descrizione: 'Socializzazione esterna', paziente: 'Gisoldo Roberto', dataInizio: '15/10/2024', dataFine: '15/04/2025', obiettivi: ['Centro diurno', 'Attività territoriali', 'Volontariato'], progresso: 30, stato: 'in_corso', referente: 'Lotrionte A.' },
+            { id: 3, titolo: 'Tirocinio Formativo', descrizione: 'Inserimento lavorativo', paziente: 'Tomasiello Francesco', dataInizio: '01/11/2024', dataFine: '30/04/2025', obiettivi: ['Rispetto orari', 'Mansioni', 'Rapporti colleghi'], progresso: 60, stato: 'in_corso', referente: 'Laguardia R.' },
+            { id: 4, titolo: 'Gestione Economica', descrizione: 'Budget personale', paziente: 'Pacella Giovanni', dataInizio: '01/10/2024', dataFine: '31/03/2025', obiettivi: ['Budget settimanale', 'Acquisti', 'Risparmio'], progresso: 70, stato: 'in_corso', referente: 'Carbone S.' },
+            { id: 5, titolo: 'Compliance Terapeutica', descrizione: 'Aderenza terapia farmacologica', paziente: 'Gravina Lucia', dataInizio: '01/06/2024', dataFine: '31/12/2024', obiettivi: ['Assunzione autonoma', 'Riconoscimento farmaci'], progresso: 90, stato: 'completato', referente: 'Beneventano M.' },
+        ];
+
+        const mockProgrammazione = [
+            { id: 1, data: '18/12/2024', orario: '10:00', attivita: 'Laboratorio Cucina', luogo: 'Cucina struttura', educatore: 'Beneventano M.', partecipanti: 4 },
+            { id: 2, data: '18/12/2024', orario: '15:00', attivita: 'Gruppo Discussione', luogo: 'Sala comune', educatore: 'Lotrionte A.', partecipanti: 8 },
+            { id: 3, data: '19/12/2024', orario: '09:30', attivita: 'Laboratorio Orto', luogo: 'Area verde', educatore: 'Laguardia R.', partecipanti: 4 },
+            { id: 4, data: '19/12/2024', orario: '15:00', attivita: 'Laboratorio Artistico', luogo: 'Sala attività', educatore: 'Carbone S.', partecipanti: 3 },
+            { id: 5, data: '20/12/2024', orario: '10:00', attivita: 'Uscita Esterna', luogo: 'Centro Potenza', educatore: 'Beneventano M.', partecipanti: 6 },
+        ];
+
+        // App Component
+        const EducationApp = () => {
+            const [activeTab, setActiveTab] = useState('overview');
+            const [modalOpen, setModalOpen] = useState(false);
+            const [modalType, setModalType] = useState(null);
+
+            const navSections = [
+                { title: 'Principale', items: [
+                    { id: 'dashboard', icon: Icons.Home, label: 'Dashboard', external: true, href: 'index.html' },
+                    { id: 'anagrafica', icon: Icons.Users, label: 'Anagrafica Utenti', external: true, href: 'index.html' },
+                    { id: 'pei', icon: Icons.FileText, label: 'Gestione PEI', external: true, href: 'index.html' },
+                    { id: 'diario', icon: Icons.Activity, label: 'Diario Clinico', external: true, href: 'index.html' },
+                ]},
+                { title: 'Area Clinica', items: [
+                    { id: 'clinical', icon: Icons.Pill, label: 'Farmaci & Parametri', external: true, href: 'clinical.html' },
+                ]},
+                { title: 'Area Educativa', items: [
+                    { id: 'education', icon: Icons.Calendar, label: 'Educativa & Relazioni', active: true },
+                ]},
+                { title: 'Gestione', items: [
+                    { id: 'management', icon: Icons.Clock, label: 'Turni & Medici', external: true, href: 'management.html' },
+                ]},
+            ];
+
+            const openModal = (type) => { setModalType(type); setModalOpen(true); };
+
+            const tabs = [
+                { id: 'overview', label: '📊 Panoramica' },
+                { id: 'relazioni', label: '👥 Relazioni Sociali' },
+                { id: 'territorio', label: '🗺️ Territorio' },
+                { id: 'laboratori', label: '🎨 Laboratori' },
+                { id: 'progetti', label: '🎯 Progetti' },
+                { id: 'programmazione', label: '📅 Programmazione' },
+            ];
+
+            return (
+                <div className="app-container">
+                    <aside className="sidebar">
+                        <div className="sidebar-header">
+                            <div className="sidebar-logo">
+                                <div className="logo-icon">LC</div>
+                                <div className="logo-text">
+                                    <h1>Lucania-Care</h1>
+                                    <span>BenEssere Cooperativa v3.0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <nav>
+                            {navSections.map((section, idx) => (
+                                <div key={idx} className="nav-section">
+                                    <div className="nav-section-title">{section.title}</div>
+                                    {section.items.map(item => (
+                                        item.external ? (
+                                            <a key={item.id} href={item.href} className="nav-item">
+                                                <item.icon /><span>{item.label}</span>
+                                                <span className="nav-external"><Icons.ExternalLink /></span>
+                                            </a>
+                                        ) : (
+                                            <div key={item.id} className={`nav-item ${item.active ? 'active' : ''}`}>
+                                                <item.icon /><span>{item.label}</span>
+                                            </div>
+                                        )
+                                    ))}
+                                </div>
+                            ))}
+                        </nav>
+                    </aside>
+
+                    <main className="main-content">
+                        <header className="header">
+                            <div className="header-title">
+                                <h2>📚 Educativa & Relazioni</h2>
+                                <p>Gestione attività educative, relazioni sociali e progetti individuali</p>
+                            </div>
+                            <div className="header-actions">
+                                <div className="search-box">
+                                    <Icons.Search />
+                                    <input type="text" placeholder="Cerca attività, progetti..." />
+                                </div>
+                                <button className="notification-btn">
+                                    <Icons.Bell />
+                                    <span className="notification-dot"></span>
+                                </button>
+                                <div className="user-menu">
+                                    <div className="user-avatar">MB</div>
+                                    <div className="user-info">
+                                        <span>Michele B.</span>
+                                        <small>Coordinatore</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </header>
+
+                        <div className="content fade-in">
+                            <div className="tabs">
+                                {tabs.map(tab => (
+                                    <button key={tab.id} className={`tab ${activeTab === tab.id ? 'active' : ''}`} onClick={() => setActiveTab(tab.id)}>
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {activeTab === 'overview' && <OverviewSection openModal={openModal} />}
+                            {activeTab === 'relazioni' && <RelazioniSection openModal={openModal} />}
+                            {activeTab === 'territorio' && <TerritorioSection openModal={openModal} />}
+                            {activeTab === 'laboratori' && <LaboratoriSection openModal={openModal} />}
+                            {activeTab === 'progetti' && <ProgettiSection openModal={openModal} />}
+                            {activeTab === 'programmazione' && <ProgrammazioneSection openModal={openModal} />}
+                        </div>
+                    </main>
+
+                    <div className={`modal-overlay ${modalOpen ? 'open' : ''}`} onClick={() => setModalOpen(false)}>
+                        <div className="modal" onClick={e => e.stopPropagation()}>
+                            <div className="modal-header">
+                                <h3>{modalType === 'relazione' ? 'Nuova Relazione Familiare' : modalType === 'territorio' ? 'Nuovo Contatto Territorio' : modalType === 'laboratorio' ? 'Nuovo Laboratorio' : modalType === 'progetto' ? 'Nuovo Progetto Interno' : 'Nuova Attività'}</h3>
+                                <button className="modal-close" onClick={() => setModalOpen(false)}><Icons.X /></button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="form-group">
+                                    <label className="form-label">Titolo/Nome</label>
+                                    <input type="text" className="form-input" placeholder="Inserisci titolo..." />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Descrizione</label>
+                                    <textarea className="form-textarea" placeholder="Descrizione dettagliata..."></textarea>
+                                </div>
+                                <div className="grid-2">
+                                    <div className="form-group">
+                                        <label className="form-label">Data Inizio</label>
+                                        <input type="date" className="form-input" />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Referente</label>
+                                        <select className="form-select">
+                                            <option>Seleziona...</option>
+                                            <option>Beneventano M.</option>
+                                            <option>Lotrionte A.</option>
+                                            <option>Carbone S.</option>
+                                            <option>Laguardia R.</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button className="btn btn-secondary" onClick={() => setModalOpen(false)}>Annulla</button>
+                                <button className="btn btn-primary" onClick={() => setModalOpen(false)}><Icons.Plus /> Salva</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Overview Section
+        const OverviewSection = ({ openModal }) => (
+            <>
+                <div className="stats-grid">
+                    <div className="stat-card purple">
+                        <div className="stat-icon purple">👥</div>
+                        <div className="stat-value">{mockRelazioniSociali.length}</div>
+                        <div className="stat-label">Relazioni Familiari</div>
+                        <div className="stat-change up">+1 questo mese</div>
+                    </div>
+                    <div className="stat-card cyan">
+                        <div className="stat-icon cyan">🗺️</div>
+                        <div className="stat-value">{mockRelazioniTerritorio.length}</div>
+                        <div className="stat-label">Contatti Territorio</div>
+                        <div className="stat-change">DSM, Servizi Sociali</div>
+                    </div>
+                    <div className="stat-card success">
+                        <div className="stat-icon success">🎨</div>
+                        <div className="stat-value">{mockLaboratori.length}</div>
+                        <div className="stat-label">Laboratori Attivi</div>
+                        <div className="stat-change up">100% operativi</div>
+                    </div>
+                    <div className="stat-card indigo">
+                        <div className="stat-icon indigo">🎯</div>
+                        <div className="stat-value">{mockProgetti.filter(p => p.stato === 'in_corso').length}</div>
+                        <div className="stat-label">Progetti in Corso</div>
+                        <div className="stat-change up">1 completato</div>
+                    </div>
+                </div>
+
+                <div className="grid-2">
+                    <div className="card">
+                        <div className="card-header">
+                            <h3>📅 Prossime Attività</h3>
+                            <button className="btn btn-sm btn-primary" onClick={() => openModal('attivita')}><Icons.Plus /> Nuova</button>
+                        </div>
+                        <div className="card-body">
+                            {mockProgrammazione.slice(0, 4).map(p => (
+                                <div key={p.id} className="activity-item">
+                                    <div className="activity-icon" style={{background: 'var(--primary-light)', color: 'var(--primary)'}}>
+                                        <Icons.Calendar />
+                                    </div>
+                                    <div className="activity-content">
+                                        <div className="activity-title">{p.attivita}</div>
+                                        <div className="activity-desc">{p.luogo}</div>
+                                        <div className="activity-meta">
+                                            <span>📅 {p.data}</span>
+                                            <span>⏰ {p.orario}</span>
+                                            <span>👤 {p.educatore}</span>
+                                        </div>
+                                    </div>
+                                    <span className="badge badge-primary">{p.partecipanti} part.</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="card">
+                        <div className="card-header">
+                            <h3>🎯 Progetti in Corso</h3>
+                            <button className="btn btn-sm btn-indigo" onClick={() => openModal('progetto')}><Icons.Plus /> Nuovo</button>
+                        </div>
+                        <div className="card-body">
+                            {mockProgetti.filter(p => p.stato === 'in_corso').slice(0, 3).map(p => (
+                                <div key={p.id} className="project-card" style={{marginBottom: 12}}>
+                                    <div className="project-header">
+                                        <div>
+                                            <div className="project-title">{p.titolo}</div>
+                                            <div className="project-period">{p.paziente}</div>
+                                        </div>
+                                        <span className="badge badge-success">{p.progresso}%</span>
+                                    </div>
+                                    <div className="progress-bar">
+                                        <div className="progress-fill" style={{width: `${p.progresso}%`, background: 'var(--success)'}}></div>
+                                    </div>
+                                    <div className="progress-text">
+                                        <span>{p.dataInizio} - {p.dataFine}</span>
+                                        <span>{p.referente}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid-2">
+                    <div className="card">
+                        <div className="card-header">
+                            <h3>📊 Report Attività Mensili (Mod. RAM)</h3>
+                            <button className="btn btn-sm btn-secondary"><Icons.Download /> Export</button>
+                        </div>
+                        <div className="card-body" style={{padding: 0}}>
+                            <table>
+                                <thead>
+                                    <tr><th>Attività</th><th>Sessioni</th><th>Partecipazioni</th><th>Valutazione</th></tr>
+                                </thead>
+                                <tbody>
+                                    {mockAttivitaMensili.map(a => (
+                                        <tr key={a.id}>
+                                            <td style={{fontWeight: 500}}>{a.attivita}</td>
+                                            <td>{a.sessioni}</td>
+                                            <td>{a.partecipazioni}</td>
+                                            <td><span className={`badge ${a.valutazione === 'Eccellente' ? 'badge-success' : 'badge-primary'}`}>{a.valutazione}</span></td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div className="card">
+                        <div className="card-header">
+                            <h3>👥 Ultimi Contatti Familiari</h3>
+                            <button className="btn btn-sm btn-purple" onClick={() => openModal('relazione')}><Icons.UserPlus /> Nuovo</button>
+                        </div>
+                        <div className="card-body">
+                            {mockRelazioniSociali.slice(0, 4).map(r => (
+                                <div key={r.id} className="relation-card" style={{marginBottom: 10}}>
+                                    <div className="relation-header">
+                                        <div>
+                                            <div className="relation-type">{r.tipo} - {r.parentela}</div>
+                                            <div className="relation-name">{r.nome}</div>
+                                        </div>
+                                        <span className="badge badge-gray">{r.frequenza}</span>
+                                    </div>
+                                    <div className="relation-footer">
+                                        <span>📞 {r.telefono}</span>
+                                        <span>Ultimo: {r.ultimoContatto}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
+
+        // Relazioni Section
+        const RelazioniSection = ({ openModal }) => (
+            <>
+                <div className="card">
+                    <div className="card-header">
+                        <h3>👥 Relazioni Socio-Familiari (Mod. RSF)</h3>
+                        <div style={{display: 'flex', gap: 8}}>
+                            <select className="form-select" style={{width: 200}}>
+                                <option>Tutti i pazienti</option>
+                                {mockPazienti.map(p => <option key={p.id}>{p.cognome} {p.nome}</option>)}
+                            </select>
+                            <button className="btn btn-purple" onClick={() => openModal('relazione')}><Icons.Plus /> Nuova Relazione</button>
+                        </div>
+                    </div>
+                    <div className="card-body" style={{padding: 0}}>
+                        <table>
+                            <thead>
+                                <tr><th>Paziente</th><th>Familiare</th><th>Parentela</th><th>Telefono</th><th>Frequenza</th><th>Ultimo Contatto</th><th>Azioni</th></tr>
+                            </thead>
+                            <tbody>
+                                {mockRelazioniSociali.map(r => (
+                                    <tr key={r.id}>
+                                        <td style={{fontWeight: 500}}>{r.paziente}</td>
+                                        <td>{r.nome}</td>
+                                        <td><span className="badge badge-purple">{r.parentela}</span></td>
+                                        <td>{r.telefono}</td>
+                                        <td><span className="badge badge-gray">{r.frequenza}</span></td>
+                                        <td>{r.ultimoContatto}</td>
+                                        <td>
+                                            <div style={{display: 'flex', gap: 4}}>
+                                                <button className="btn btn-sm btn-outline"><Icons.Eye /></button>
+                                                <button className="btn btn-sm btn-outline"><Icons.Edit /></button>
+                                                <button className="btn btn-sm btn-outline"><Icons.Phone /></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div className="card">
+                    <div className="card-header"><h3>📝 Note Relazioni</h3></div>
+                    <div className="card-body">
+                        <div className="grid-3">
+                            {mockRelazioniSociali.map(r => (
+                                <div key={r.id} className="relation-card">
+                                    <div className="relation-header">
+                                        <div>
+                                            <div className="relation-type">{r.paziente}</div>
+                                            <div className="relation-name">{r.nome} ({r.parentela})</div>
+                                        </div>
+                                    </div>
+                                    <div className="relation-body">{r.note}</div>
+                                    <div className="relation-footer"><span>Ultimo: {r.ultimoContatto}</span></div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
+
+        // Territorio Section
+        const TerritorioSection = ({ openModal }) => (
+            <>
+                <div className="stats-grid">
+                    <div className="stat-card primary"><div className="stat-icon primary">🏥</div><div className="stat-value">2</div><div className="stat-label">Contatti DSM</div></div>
+                    <div className="stat-card success"><div className="stat-icon success">🏛️</div><div className="stat-value">1</div><div className="stat-label">Servizi Sociali</div></div>
+                    <div className="stat-card warning"><div className="stat-icon warning">🤝</div><div className="stat-value">1</div><div className="stat-label">Associazioni</div></div>
+                    <div className="stat-card cyan"><div className="stat-icon cyan">📚</div><div className="stat-value">0</div><div className="stat-label">Enti Formazione</div></div>
+                </div>
+
+                <div className="card">
+                    <div className="card-header">
+                        <h3>🗺️ Relazioni con il Territorio (Mod. VET / Mod. SAT)</h3>
+                        <button className="btn btn-cyan" onClick={() => openModal('territorio')}><Icons.Plus /> Nuovo Contatto</button>
+                    </div>
+                    <div className="card-body" style={{padding: 0}}>
+                        <table>
+                            <thead><tr><th>Tipo</th><th>Ente</th><th>Referente</th><th>Ruolo</th><th>Contatti</th><th>Ultimo Contatto</th><th>Azioni</th></tr></thead>
+                            <tbody>
+                                {mockRelazioniTerritorio.map(r => (
+                                    <tr key={r.id}>
+                                        <td><span className={`badge ${r.tipo === 'DSM' ? 'badge-primary' : r.tipo === 'Servizi Sociali' ? 'badge-success' : 'badge-warning'}`}>{r.tipo}</span></td>
+                                        <td style={{fontWeight: 500}}>{r.ente}</td>
+                                        <td>{r.referente}</td>
+                                        <td style={{fontSize: 12, color: 'var(--gray-600)'}}>{r.ruolo}</td>
+                                        <td><div style={{fontSize: 12}}>📞 {r.telefono}<br/>📧 {r.email}</div></td>
+                                        <td>{r.ultimoContatto}</td>
+                                        <td>
+                                            <div style={{display: 'flex', gap: 4}}>
+                                                <button className="btn btn-sm btn-outline"><Icons.Eye /></button>
+                                                <button className="btn btn-sm btn-outline"><Icons.Edit /></button>
+                                                <button className="btn btn-sm btn-outline"><Icons.Mail /></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </>
+        );
+
+        // Laboratori Section
+        const LaboratoriSection = ({ openModal }) => (
+            <>
+                <div className="card">
+                    <div className="card-header">
+                        <h3>🎨 Laboratori Attivi (Mod. LDU)</h3>
+                        <button className="btn btn-success" onClick={() => openModal('laboratorio')}><Icons.Plus /> Nuovo Laboratorio</button>
+                    </div>
+                    <div className="card-body">
+                        <div className="grid-3">
+                            {mockLaboratori.map(lab => (
+                                <div key={lab.id} className="project-card">
+                                    <div className="project-header">
+                                        <div>
+                                            <div className="project-title">{lab.nome}</div>
+                                            <div className="project-period">{lab.giorno} • {lab.orario}</div>
+                                        </div>
+                                        <span className="badge badge-success">{lab.stato}</span>
+                                    </div>
+                                    <p style={{fontSize: 12, color: 'var(--gray-600)', marginBottom: 10}}>{lab.descrizione}</p>
+                                    <div style={{fontSize: 12, marginBottom: 8}}><strong>Educatore:</strong> {lab.educatore}</div>
+                                    <div style={{fontSize: 12, marginBottom: 8}}><strong>Obiettivo:</strong> {lab.obiettivo}</div>
+                                    <div style={{fontSize: 11, color: 'var(--gray-500)'}}><strong>Partecipanti:</strong> {lab.partecipanti.join(', ')}</div>
+                                    <div style={{marginTop: 12, display: 'flex', gap: 6}}>
+                                        <button className="btn btn-sm btn-outline"><Icons.Eye /> Dettagli</button>
+                                        <button className="btn btn-sm btn-outline"><Icons.Edit /> Modifica</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="card">
+                    <div className="card-header"><h3>📈 Scheda Archiviazione Attività (Mod. SAA)</h3><button className="btn btn-sm btn-secondary"><Icons.Download /> Export</button></div>
+                    <div className="card-body" style={{padding: 0}}>
+                        <table>
+                            <thead><tr><th>Mese</th><th>Attività</th><th>Sessioni</th><th>Partecipazioni</th><th>Note</th><th>Valutazione</th></tr></thead>
+                            <tbody>
+                                {mockAttivitaMensili.map(a => (
+                                    <tr key={a.id}>
+                                        <td style={{fontWeight: 500}}>{a.mese}</td>
+                                        <td>{a.attivita}</td>
+                                        <td>{a.sessioni}</td>
+                                        <td>{a.partecipazioni}</td>
+                                        <td style={{fontSize: 12, maxWidth: 200}}>{a.note}</td>
+                                        <td><span className={`badge ${a.valutazione === 'Eccellente' ? 'badge-success' : 'badge-primary'}`}>{a.valutazione}</span></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </>
+        );
+
+        // Progetti Section
+        const ProgettiSection = ({ openModal }) => (
+            <>
+                <div className="card">
+                    <div className="card-header">
+                        <h3>🎯 Progetti Interni (Mod. FPCA)</h3>
+                        <button className="btn btn-indigo" onClick={() => openModal('progetto')}><Icons.Plus /> Nuovo Progetto</button>
+                    </div>
+                    <div className="card-body">
+                        <div className="grid-2">
+                            {mockProgetti.map(p => (
+                                <div key={p.id} className="project-card" style={{border: p.stato === 'completato' ? '1px solid var(--success)' : '1px solid var(--gray-200)'}}>
+                                    <div className="project-header">
+                                        <div>
+                                            <div className="project-title">{p.titolo}</div>
+                                            <div className="project-period">{p.paziente}</div>
+                                        </div>
+                                        <span className={`badge ${p.stato === 'completato' ? 'badge-success' : 'badge-primary'}`}>{p.stato === 'completato' ? '✓ Completato' : `${p.progresso}%`}</span>
+                                    </div>
+                                    <p style={{fontSize: 12, color: 'var(--gray-600)', marginBottom: 10}}>{p.descrizione}</p>
+                                    <div className="progress-bar">
+                                        <div className="progress-fill" style={{width: `${p.progresso}%`, background: p.stato === 'completato' ? 'var(--success)' : 'var(--primary)'}}></div>
+                                    </div>
+                                    <div style={{fontSize: 12, marginTop: 10}}>
+                                        <strong>Obiettivi:</strong>
+                                        <ul style={{marginLeft: 16, marginTop: 4}}>
+                                            {p.obiettivi.map((o, i) => <li key={i} style={{fontSize: 11, color: 'var(--gray-600)'}}>{o}</li>)}
+                                        </ul>
+                                    </div>
+                                    <div className="progress-text" style={{marginTop: 10}}>
+                                        <span>📅 {p.dataInizio} - {p.dataFine}</span>
+                                        <span>👤 {p.referente}</span>
+                                    </div>
+                                    <div style={{marginTop: 12, display: 'flex', gap: 6}}>
+                                        <button className="btn btn-sm btn-outline"><Icons.Eye /> Dettagli</button>
+                                        <button className="btn btn-sm btn-outline"><Icons.Clipboard /> Verifica</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="card">
+                    <div className="card-header"><h3>✅ Valutazione Progetti (Mod. VPI)</h3></div>
+                    <div className="card-body" style={{padding: 0}}>
+                        <table>
+                            <thead><tr><th>Progetto</th><th>Paziente</th><th>Periodo</th><th>Progresso</th><th>Referente</th><th>Stato</th><th>Azioni</th></tr></thead>
+                            <tbody>
+                                {mockProgetti.map(p => (
+                                    <tr key={p.id}>
+                                        <td style={{fontWeight: 500}}>{p.titolo}</td>
+                                        <td>{p.paziente}</td>
+                                        <td style={{fontSize: 12}}>{p.dataInizio} - {p.dataFine}</td>
+                                        <td>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                                                <div style={{width: 60, height: 6, background: 'var(--gray-200)', borderRadius: 3}}>
+                                                    <div style={{width: `${p.progresso}%`, height: '100%', background: p.stato === 'completato' ? 'var(--success)' : 'var(--primary)', borderRadius: 3}}></div>
+                                                </div>
+                                                <span style={{fontSize: 12}}>{p.progresso}%</span>
+                                            </div>
+                                        </td>
+                                        <td>{p.referente}</td>
+                                        <td><span className={`badge ${p.stato === 'completato' ? 'badge-success' : 'badge-primary'}`}>{p.stato === 'completato' ? 'Completato' : 'In corso'}</span></td>
+                                        <td><button className="btn btn-sm btn-primary"><Icons.Clipboard /> Valuta</button></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </>
+        );
+
+        // Programmazione Section
+        const ProgrammazioneSection = ({ openModal }) => (
+            <>
+                <div className="card">
+                    <div className="card-header">
+                        <h3>📅 Programmazione Attività (Mod. PRA)</h3>
+                        <div style={{display: 'flex', gap: 8}}>
+                            <button className="btn btn-secondary">◀ Sett. Prec.</button>
+                            <button className="btn btn-secondary">Sett. Succ. ▶</button>
+                            <button className="btn btn-primary" onClick={() => openModal('attivita')}><Icons.Plus /> Nuova Attività</button>
+                        </div>
+                    </div>
+                    <div className="card-body" style={{padding: 0}}>
+                        <table>
+                            <thead><tr><th>Data</th><th>Orario</th><th>Attività</th><th>Luogo</th><th>Educatore</th><th>Partecipanti</th><th>Azioni</th></tr></thead>
+                            <tbody>
+                                {mockProgrammazione.map(p => (
+                                    <tr key={p.id}>
+                                        <td style={{fontWeight: 500}}>{p.data}</td>
+                                        <td>{p.orario}</td>
+                                        <td>{p.attivita}</td>
+                                        <td style={{fontSize: 12, color: 'var(--gray-600)'}}>{p.luogo}</td>
+                                        <td>{p.educatore}</td>
+                                        <td><span className="badge badge-primary">{p.partecipanti}</span></td>
+                                        <td>
+                                            <div style={{display: 'flex', gap: 4}}>
+                                                <button className="btn btn-sm btn-outline"><Icons.Eye /></button>
+                                                <button className="btn btn-sm btn-outline"><Icons.Edit /></button>
+                                                <button className="btn btn-sm btn-outline"><Icons.Printer /></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div className="card">
+                    <div className="card-header"><h3>✅ Verifica Programmazione (Mod. VEP)</h3><button className="btn btn-sm btn-secondary"><Icons.Download /> Export Verifica</button></div>
+                    <div className="card-body">
+                        <div className="grid-3">
+                            {mockLaboratori.slice(0, 3).map(lab => (
+                                <div key={lab.id} className="project-card">
+                                    <div className="project-header">
+                                        <div>
+                                            <div className="project-title">{lab.nome}</div>
+                                            <div className="project-period">{lab.giorno}</div>
+                                        </div>
+                                        <span className="badge badge-success">✓ Eseguito</span>
+                                    </div>
+                                    <div style={{fontSize: 12, marginTop: 10}}>
+                                        <div style={{marginBottom: 6}}><strong>Partecipanti previsti:</strong> {lab.partecipanti.length}</div>
+                                        <div style={{marginBottom: 6}}><strong>Partecipanti effettivi:</strong> {lab.partecipanti.length}</div>
+                                        <div><strong>Note verifica:</strong> Attività svolta regolarmente</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
+
+        ReactDOM.render(<EducationApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>

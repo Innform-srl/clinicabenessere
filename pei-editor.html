@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucania-Care v3.0 - Modifica PEI</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb; --primary-dark: #1d4ed8; --primary-light: #dbeafe;
+            --success: #10b981; --success-light: #d1fae5;
+            --warning: #f59e0b; --warning-light: #fef3c7;
+            --danger: #ef4444; --danger-light: #fee2e2;
+            --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+            --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280;
+            --gray-600: #4b5563; --gray-700: #374151; --gray-800: #1f2937; --gray-900: #111827;
+            --purple: #8b5cf6; --purple-light: #ede9fe;
+            --cyan: #06b6d4; --cyan-light: #cffafe;
+            --teal: #14b8a6; --teal-light: #ccfbf1;
+            --orange: #f97316; --orange-light: #fed7aa;
+            --pink: #ec4899; --pink-light: #fce7f3;
+            --indigo: #6366f1; --indigo-light: #e0e7ff;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--gray-50); color: var(--gray-800); }
+        .app-container { display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background: linear-gradient(180deg, var(--gray-900) 0%, var(--gray-800) 100%); color: white; padding: 16px 0; position: fixed; height: 100vh; overflow-y: auto; z-index: 100; }
+        .sidebar-header { padding: 0 16px 16px; border-bottom: 1px solid var(--gray-700); margin-bottom: 16px; }
+        .sidebar-logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary) 0%, var(--cyan) 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+        .logo-text h1 { font-size: 16px; font-weight: 700; color: white; }
+        .logo-text span { font-size: 10px; color: var(--gray-400); }
+        .nav-section { margin-bottom: 20px; }
+        .nav-section-title { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--gray-500); padding: 0 16px; margin-bottom: 6px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: var(--gray-400); cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; font-size: 13px; text-decoration: none; }
+        .nav-item:hover { background: var(--gray-700); color: white; }
+        .nav-item.active { background: rgba(37, 99, 235, 0.15); color: var(--primary); border-left-color: var(--primary); }
+        .nav-item svg { width: 18px; height: 18px; }
+        .nav-external { font-size: 9px; color: var(--gray-500); margin-left: auto; }
+        .main-content { flex: 1; margin-left: 260px; min-height: 100vh; }
+        .header { background: white; padding: 14px 24px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+        .header-title { display: flex; align-items: center; gap: 16px; }
+        .header-title h2 { font-size: 18px; font-weight: 600; color: var(--gray-900); }
+        .header-title p { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+        .back-btn { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: var(--gray-100); border: none; border-radius: 8px; color: var(--gray-600); font-size: 13px; cursor: pointer; text-decoration: none; }
+        .back-btn:hover { background: var(--gray-200); }
+        .header-actions { display: flex; align-items: center; gap: 10px; }
+        .content { padding: 20px 24px; max-width: 1400px; }
+        
+        /* Cards */
+        .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 16px; overflow: hidden; }
+        .card-header { padding: 14px 16px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: space-between; }
+        .card-header h3 { font-size: 14px; font-weight: 600; color: var(--gray-800); display: flex; align-items: center; gap: 8px; }
+        .card-body { padding: 20px; }
+        
+        /* Form */
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-600); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+        .form-label.required::after { content: ' *'; color: var(--danger); }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 14px; color: var(--gray-800); background: white; transition: all 0.2s; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+        .form-input:disabled, .form-select:disabled { background: var(--gray-100); color: var(--gray-500); cursor: not-allowed; }
+        .form-textarea { min-height: 100px; resize: vertical; }
+        .form-hint { font-size: 11px; color: var(--gray-500); margin-top: 4px; }
+        .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .form-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .form-row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 500; border: none; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: var(--gray-100); color: var(--gray-700); }
+        .btn-secondary:hover { background: var(--gray-200); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--gray-300); color: var(--gray-700); }
+        .btn-outline:hover { background: var(--gray-50); border-color: var(--gray-400); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .btn-lg { padding: 12px 24px; font-size: 15px; }
+        
+        /* Badge */
+        .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+        .badge-primary { background: var(--primary-light); color: var(--primary); }
+        .badge-success { background: var(--success-light); color: var(--success); }
+        .badge-warning { background: var(--warning-light); color: var(--warning); }
+        .badge-danger { background: var(--danger-light); color: var(--danger); }
+        .badge-purple { background: var(--purple-light); color: var(--purple); }
+        .badge-cyan { background: var(--cyan-light); color: var(--cyan); }
+        .badge-gray { background: var(--gray-100); color: var(--gray-600); }
+        
+        /* Tabs */
+        .tabs { display: flex; gap: 4px; background: var(--gray-100); padding: 4px; border-radius: 10px; margin-bottom: 20px; }
+        .tab { flex: 1; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; background: transparent; color: var(--gray-600); cursor: pointer; border: none; transition: all 0.2s; text-align: center; }
+        .tab:hover { color: var(--gray-800); }
+        .tab.active { background: white; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        
+        /* Patient Header */
+        .patient-header { background: linear-gradient(135deg, var(--primary) 0%, var(--purple) 100%); color: white; padding: 20px 24px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px; }
+        .patient-avatar { width: 70px; height: 70px; border-radius: 14px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; }
+        .patient-info h2 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+        .patient-info p { font-size: 13px; opacity: 0.9; }
+        .patient-badges { display: flex; gap: 8px; margin-top: 8px; }
+        .patient-badges .badge { background: rgba(255,255,255,0.2); color: white; }
+        .patient-meta { margin-left: auto; text-align: right; }
+        .patient-meta-item { font-size: 12px; opacity: 0.8; margin-bottom: 4px; }
+        .patient-meta-value { font-size: 16px; font-weight: 600; }
+        
+        /* Area Intervento */
+        .area-card { background: var(--gray-50); border-radius: 10px; padding: 16px; margin-bottom: 12px; border-left: 4px solid var(--primary); }
+        .area-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .area-title { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+        .area-number { font-size: 11px; color: var(--gray-500); }
+        .area-grid { display: grid; grid-template-columns: 1fr 100px 2fr 1fr; gap: 12px; align-items: start; }
+        .area-grid-label { font-size: 11px; color: var(--gray-500); margin-bottom: 4px; text-transform: uppercase; }
+        
+        /* Verifica Trimestrale */
+        .verifica-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 8px; margin-bottom: 16px; }
+        .verifica-item { text-align: center; }
+        .verifica-label { font-size: 10px; color: var(--gray-500); margin-bottom: 4px; display: block; }
+        .verifica-input { width: 100%; padding: 8px 4px; border: 1px solid var(--gray-200); border-radius: 6px; text-align: center; font-size: 14px; font-weight: 600; }
+        .verifica-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-light); }
+        
+        /* Legenda */
+        .legenda { display: flex; gap: 16px; flex-wrap: wrap; padding: 12px 16px; background: var(--gray-50); border-radius: 8px; margin-bottom: 16px; }
+        .legenda-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--gray-600); }
+        .legenda-dot { width: 12px; height: 12px; border-radius: 3px; }
+        .legenda-dot.v0 { background: var(--danger); }
+        .legenda-dot.v1 { background: var(--warning); }
+        .legenda-dot.v2 { background: var(--primary); }
+        .legenda-dot.v3 { background: var(--cyan); }
+        .legenda-dot.v4 { background: var(--success); }
+        
+        /* Terapia Table */
+        .terapia-table { width: 100%; border-collapse: collapse; }
+        .terapia-table th, .terapia-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--gray-100); font-size: 13px; }
+        .terapia-table th { background: var(--gray-50); font-weight: 600; color: var(--gray-600); font-size: 11px; text-transform: uppercase; }
+        .terapia-table tr:hover { background: var(--gray-50); }
+        .terapia-actions { display: flex; gap: 4px; }
+        
+        /* Section Title */
+        .section-title { font-size: 16px; font-weight: 600; color: var(--gray-800); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+        .section-title::before { content: ''; width: 4px; height: 20px; background: var(--primary); border-radius: 2px; }
+        
+        /* Info Box */
+        .info-box { background: var(--primary-light); border: 1px solid var(--primary); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+        .info-box.warning { background: var(--warning-light); border-color: var(--warning); }
+        .info-box.success { background: var(--success-light); border-color: var(--success); }
+        .info-box-icon { font-size: 18px; }
+        .info-box-text { font-size: 13px; color: var(--gray-700); }
+        
+        /* Strumenti Grid */
+        .strumenti-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .strumento-card { background: var(--gray-50); border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+        .strumento-card:hover { border-color: var(--primary); background: var(--primary-light); }
+        .strumento-card.selected { border-color: var(--primary); background: var(--primary-light); }
+        .strumento-icon { font-size: 24px; margin-bottom: 6px; }
+        .strumento-name { font-size: 12px; font-weight: 600; color: var(--gray-700); }
+        .strumento-value { font-size: 18px; font-weight: 700; color: var(--primary); margin-top: 4px; }
+        
+        /* Footer Actions */
+        .footer-actions { position: sticky; bottom: 0; background: white; padding: 16px 24px; border-top: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; margin: 0 -24px -20px; box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.1); }
+        .footer-info { font-size: 12px; color: var(--gray-500); }
+        .footer-buttons { display: flex; gap: 10px; }
+        
+        /* Animation */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        
+        /* Toast */
+        .toast { position: fixed; bottom: 24px; right: 24px; background: var(--gray-900); color: white; padding: 14px 20px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1000; animation: slideIn 0.3s ease-out; }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        @media (max-width: 1200px) { .form-row, .form-row-3, .form-row-4 { grid-template-columns: 1fr; } .area-grid { grid-template-columns: 1fr; } .strumenti-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; } .patient-header { flex-direction: column; text-align: center; } .patient-meta { margin-left: 0; text-align: center; margin-top: 16px; } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Icons
+        const Icons = {
+            ArrowLeft: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>,
+            Save: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>,
+            FileText: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+            Users: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>,
+            Target: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
+            Activity: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+            Calendar: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+            Clipboard: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>,
+            BarChart: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>,
+            Plus: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+            Trash: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
+            Edit: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+            Check: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>,
+            Info: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>,
+            Download: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+            Printer: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>,
+            Home: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+            ExternalLink: () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+            Pill: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>,
+            Clock: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+        };
+
+        // Mock Patient Data
+        const mockPatient = {
+            id: 1,
+            nome: 'Teresa',
+            cognome: 'Basile',
+            cf: 'GMBNTL83C46G793S',
+            dataNascita: '06/03/1983',
+            luogoNascita: 'Polla (SA)',
+            stato: 'attivo',
+            diagnosi: 'Disturbo di conversione con ritardo mentale',
+            codiceDiagnosi: 'F44.9',
+            struttura: 'Casa Alloggio',
+            dataIns: '12/04/2021',
+            dataCompilazione: '22/04/2021',
+            anno: '2025',
+            codiceId: 'GN',
+            statoCivile: 'Coniugata',
+            scolarita: 'Licenza Media',
+            condLavorativa: 'Pensione di invalidità',
+            abitazione: 'di famiglia',
+            conviventi: 'Marito Vincenzo con figlio minorenne (9 anni)',
+            famigliaOrigine: 'Padre deceduto, madre anziana',
+            familiareRif: 'Vincenzo Mastroberti (marito)',
+            telefonoFam: '339 6887515',
+            medico: 'Adinolfi',
+            psichiatra: 'Dott. Andrea Barra',
+            coordinatore: 'Dr. Beneventano Michele',
+            assistenteSociale: 'Dr.ssa Santina Maria',
+            terapia: [
+                { ora: '08:00', farmaco: 'DEPAKIN GRANULATO 750mg', dose: '1 bust.' },
+                { ora: '08:00', farmaco: 'CLOZAPINA 100mg', dose: '1/2 cpr' },
+                { ora: '08:00', farmaco: 'TAVOR 2,5MG', dose: '1 cpr' },
+                { ora: '08:00', farmaco: 'LARGACTIL 25MG', dose: '1 cpr' },
+                { ora: '15:00', farmaco: 'LARGACTIL 25MG', dose: '1 cpr' },
+                { ora: '15:00', farmaco: 'CLOZAPINA 25MG', dose: '1 cpr' },
+                { ora: '21:00', farmaco: 'DEPAKIN GRANULATO 750mg', dose: '1 bust.' },
+                { ora: '21:00', farmaco: 'CLOZAPINA 100mg', dose: '1/2 cpr' },
+                { ora: '21:00', farmaco: 'TAVOR 2,5MG', dose: '1 cpr' },
+                { ora: '21:00', farmaco: 'LARGACTIL 25MG', dose: '1/2 cpr' },
+                { ora: '21:00', farmaco: 'CLOZAPINA 25MG', dose: '1 cpr' },
+            ],
+        };
+
+        // Aree di Intervento
+        const areeIntervento = [
+            { id: 1, nome: 'Cura dell\'igiene personale, abbigliamento/cura della salute fisica e psichica', codice: 'R.2.a5-a5*', problematicita: ['a) Motivazione', 'Assente/rifiuto (0)', 'Sufficiente (1)', 'Buono (2)', 'b) Capacità esecutive', 'Assente (0)', 'Parziali con supervisione (2)', 'Parziali senza supervisione (3)', 'Complete con supervisione (3)', 'Complete senza supervisione (4)'] },
+            { id: 2, nome: 'Cura dell\'ambiente di vita ed utilizzo degli elettrodomestici', codice: 'R.2.a5-a5*', problematicita: ['a) Motivazione', 'b) Capacità esecutive'] },
+            { id: 3, nome: 'Compliance alla terapia farmacologica', codice: '', problematicita: ['Assente/rifiuto (0)', 'Motivo', 'Bisogno di valutazione costante (1)', 'Buona nella fase di compenso (2)', 'Buono (3)'] },
+            { id: 4, nome: 'Capacità di far fronte all\'emergenza. Capacità di', codice: '', problematicita: [] },
+            { id: 5, nome: 'Rapporti familiari', codice: '', problematicita: [] },
+            { id: 6, nome: 'Comportamento e controllo degli impulsi', codice: '', problematicita: [] },
+            { id: 7, nome: 'Gestione delle risorse economiche', codice: '', problematicita: [] },
+            { id: 8, nome: 'Lavoro', codice: '', problematicita: [] },
+            { id: 9, nome: 'Relazioni sociali', codice: '', problematicita: [] },
+            { id: 10, nome: 'Tempo libero ed interessi', codice: '', problematicita: [] },
+            { id: 11, nome: 'Capacità espressive', codice: '', problematicita: [] },
+            { id: 12, nome: 'Uso di mezzi, strumenti e servizi', codice: '', problematicita: [] },
+        ];
+
+        // Strumenti Valutazione
+        const strumentiValutazione = [
+            { id: 'BPRS', nome: 'BPRS-18', descrizione: 'Brief Psychiatric Rating Scale', valore: 32 },
+            { id: 'VADO', nome: 'VADO-AR', descrizione: 'Aree Riabilitative', valore: 24 },
+            { id: 'CAN', nome: 'CAN', descrizione: 'Camberwell Assessment', valore: 8 },
+            { id: 'RECOVERY', nome: 'Recovery Star', descrizione: 'Stella del Recupero', valore: 28 },
+        ];
+
+        // Main App
+        const PEIEditorApp = () => {
+            const [activeTab, setActiveTab] = useState('anagrafica');
+            const [patient, setPatient] = useState(mockPatient);
+            const [showToast, setShowToast] = useState(false);
+            const [toastMessage, setToastMessage] = useState('');
+            const [formData, setFormData] = useState({
+                // Obiettivi
+                obiettivoBreve: 'Aumentare la consapevolezza, la motivazione e il senso critico alla cura dell\'ambiente di vita, al tempo libero e gli interessi personali.',
+                obiettivoMedio: 'Motivazione all\'autonomia personale, migliorare le capacità di interazione.',
+                obiettivoLungo: 'Consolidare l\'autonomia personale e supportare l\'utente sia nella gestione personale della propria condizione psichica favorendo la graduale autonomia sulle aree maggiormente deficitarie.',
+                referentePrincipale: 'Tutti gli Operatori',
+                figureRiferimento: 'Tutti gli Operatori',
+                tempiVerifica: 'Trimestrale',
+                risorsePreviste: 'Servizi territoriali e rete familiare',
+                // Aree valori
+                areeValori: { 1: { motivazione: 0, capacita: 0 }, 2: { motivazione: 0, capacita: 0 }, 3: 1 },
+                // Verifiche trimestrali
+                verifiche: {
+                    Q1: { aree: [0,0,0,0,0,0,0,0,0,0,0,0], data: '', cgi: '', miglioramento: '' },
+                    Q2: { aree: [0,0,0,0,0,0,0,0,0,0,0,0], data: '', cgi: '', miglioramento: '' },
+                    Q3: { aree: [0,0,0,0,0,0,0,0,0,0,0,0], data: '', cgi: '', miglioramento: '' },
+                    Q4: { aree: [0,0,0,0,0,0,0,0,0,0,0,0], data: '', cgi: '', miglioramento: '' },
+                },
+                // Strumenti
+                strumenti: { BPRS: 32, VADO: 24, CAN: 8, RECOVERY: 28 },
+            });
+
+            const handleSave = () => {
+                setToastMessage('✓ PEI salvato con successo!');
+                setShowToast(true);
+                setTimeout(() => setShowToast(false), 3000);
+            };
+
+            const tabs = [
+                { id: 'anagrafica', label: 'Dati Anagrafici', icon: Icons.Users },
+                { id: 'aree', label: 'Aree di Intervento', icon: Icons.Target },
+                { id: 'obiettivi', label: 'Obiettivi', icon: Icons.Clipboard },
+                { id: 'verifiche', label: 'Verifiche Trimestrali', icon: Icons.Calendar },
+                { id: 'strumenti', label: 'Strumenti Valutazione', icon: Icons.BarChart },
+                { id: 'terapia', label: 'Terapia Farmacologica', icon: Icons.Pill },
+            ];
+
+            return (
+                <div className="app-container">
+                    {/* Sidebar */}
+                    <aside className="sidebar">
+                        <div className="sidebar-header">
+                            <div className="sidebar-logo">
+                                <div className="logo-icon">LC</div>
+                                <div className="logo-text">
+                                    <h1>Lucania-Care</h1>
+                                    <span>BenEssere Cooperativa v3.0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <nav>
+                            <div className="nav-section">
+                                <div className="nav-section-title">Navigazione</div>
+                                <a href="index.html" className="nav-item"><Icons.Home /><span>Dashboard</span></a>
+                                <a href="index.html" className="nav-item active"><Icons.FileText /><span>Gestione PEI</span></a>
+                                <a href="clinical.html" className="nav-item"><Icons.Pill /><span>Farmaci & Parametri</span><span className="nav-external"><Icons.ExternalLink /></span></a>
+                                <a href="management.html" className="nav-item"><Icons.Clock /><span>Turni & Medici</span><span className="nav-external"><Icons.ExternalLink /></span></a>
+                            </div>
+                        </nav>
+                    </aside>
+
+                    {/* Main Content */}
+                    <main className="main-content">
+                        <header className="header">
+                            <div className="header-title">
+                                <a href="lucania-care-v3-main.html" className="back-btn">
+                                    <Icons.ArrowLeft /> Torna al PEI
+                                </a>
+                                <div>
+                                    <h2>Modifica PEI</h2>
+                                    <p>Piano Educativo Individualizzato - {patient.cognome} {patient.nome}</p>
+                                </div>
+                            </div>
+                            <div className="header-actions">
+                                <button className="btn btn-outline"><Icons.Printer /> Stampa</button>
+                                <button className="btn btn-outline"><Icons.Download /> Esporta PDF</button>
+                                <button className="btn btn-success btn-lg" onClick={handleSave}><Icons.Save /> Salva Modifiche</button>
+                            </div>
+                        </header>
+
+                        <div className="content fade-in">
+                            {/* Patient Header */}
+                            <div className="patient-header">
+                                <div className="patient-avatar">BT</div>
+                                <div className="patient-info">
+                                    <h2>{patient.cognome} {patient.nome}</h2>
+                                    <p>Progetto Educativo Individuale (P.E.I.) – I.C.F.</p>
+                                    <div className="patient-badges">
+                                        <span className="badge">Casa Alloggio</span>
+                                        <span className="badge">ID: {patient.codiceId}</span>
+                                        <span className="badge">Anno: {patient.anno}</span>
+                                    </div>
+                                </div>
+                                <div className="patient-meta">
+                                    <div className="patient-meta-item">Data Inserimento</div>
+                                    <div className="patient-meta-value">{patient.dataIns}</div>
+                                    <div className="patient-meta-item" style={{marginTop: 8}}>Data Compilazione</div>
+                                    <div className="patient-meta-value">{patient.dataCompilazione}</div>
+                                </div>
+                            </div>
+
+                            {/* Tabs */}
+                            <div className="tabs">
+                                {tabs.map(tab => (
+                                    <button 
+                                        key={tab.id} 
+                                        className={`tab ${activeTab === tab.id ? 'active' : ''}`}
+                                        onClick={() => setActiveTab(tab.id)}
+                                    >
+                                        <tab.icon /> {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Tab Content */}
+                            {activeTab === 'anagrafica' && <AnagraficaTab patient={patient} setPatient={setPatient} />}
+                            {activeTab === 'aree' && <AreeTab formData={formData} setFormData={setFormData} />}
+                            {activeTab === 'obiettivi' && <ObiettiviTab formData={formData} setFormData={setFormData} />}
+                            {activeTab === 'verifiche' && <VerificheTab formData={formData} setFormData={setFormData} />}
+                            {activeTab === 'strumenti' && <StrumentiTab formData={formData} setFormData={setFormData} />}
+                            {activeTab === 'terapia' && <TerapiaTab patient={patient} />}
+
+                            {/* Footer Actions */}
+                            <div className="footer-actions">
+                                <div className="footer-info">
+                                    <Icons.Info /> Ultima modifica: 27/11/2025 14:32 da Beneventano M.
+                                </div>
+                                <div className="footer-buttons">
+                                    <button className="btn btn-secondary">Annulla</button>
+                                    <button className="btn btn-success btn-lg" onClick={handleSave}><Icons.Save /> Salva Modifiche</button>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+
+                    {/* Toast */}
+                    {showToast && (
+                        <div className="toast success">
+                            <Icons.Check /> {toastMessage}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Anagrafica Tab
+        const AnagraficaTab = ({ patient, setPatient }) => (
+            <>
+                <div className="card">
+                    <div className="card-header">
+                        <h3><Icons.Users /> Dati Anagrafici e Socio-Familiari</h3>
+                    </div>
+                    <div className="card-body">
+                        <div className="form-row-3">
+                            <div className="form-group">
+                                <label className="form-label required">Cognome e Nome</label>
+                                <input type="text" className="form-input" value={`${patient.cognome} ${patient.nome}`} onChange={e => {}} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label required">Codice Fiscale</label>
+                                <input type="text" className="form-input" value={patient.cf} style={{fontFamily: 'monospace'}} disabled />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Codice ID</label>
+                                <input type="text" className="form-input" value={patient.codiceId} onChange={e => {}} />
+                            </div>
+                        </div>
+                        <div className="form-row-4">
+                            <div className="form-group">
+                                <label className="form-label">Luogo e Data di Nascita</label>
+                                <input type="text" className="form-input" value={`${patient.luogoNascita} ${patient.dataNascita}`} onChange={e => {}} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Domicilio</label>
+                                <input type="text" className="form-input" value='Comunità Alloggio "La Sentinella"' onChange={e => {}} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Telefono</label>
+                                <input type="text" className="form-input" value="" placeholder="Inserisci telefono" />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Cellulare</label>
+                                <input type="text" className="form-input" value="" placeholder="Inserisci cellulare" />
+                            </div>
+                        </div>
+                        <div className="form-row-4">
+                            <div className="form-group">
+                                <label className="form-label">Stato Civile</label>
+                                <select className="form-select" value={patient.statoCivile}>
+                                    <option>Coniugata</option>
+                                    <option>Celibe/Nubile</option>
+                                    <option>Divorziato/a</option>
+                                    <option>Vedovo/a</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Scolarità</label>
+                                <select className="form-select" value={patient.scolarita}>
+                                    <option>Licenza Elementare</option>
+                                    <option>Licenza Media</option>
+                                    <option>Diploma</option>
+                                    <option>Laurea</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Condizione Lavorativa</label>
+                                <select className="form-select" value={patient.condLavorativa}>
+                                    <option>Pensione di invalidità</option>
+                                    <option>Pensione</option>
+                                    <option>Disoccupato</option>
+                                    <option>Occupato</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Abitazione</label>
+                                <select className="form-select" value={patient.abitazione}>
+                                    <option>di famiglia</option>
+                                    <option>in affitto</option>
+                                    <option>di proprietà</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label className="form-label">Conviventi</label>
+                                <input type="text" className="form-input" value={patient.conviventi} onChange={e => {}} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Famiglia d'Origine</label>
+                                <input type="text" className="form-input" value={patient.famigliaOrigine} onChange={e => {}} />
+                            </div>
+                        </div>
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label className="form-label">Familiare di Riferimento</label>
+                                <input type="text" className="form-input" value={patient.familiareRif} onChange={e => {}} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Telefono Familiare</label>
+                                <input type="text" className="form-input" value={patient.telefonoFam} onChange={e => {}} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="card">
+                    <div className="card-header">
+                        <h3>🩺 Dati Anamnestici</h3>
+                    </div>
+                    <div className="card-body">
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label className="form-label required">Diagnosi</label>
+                                <input type="text" className="form-input" value={patient.diagnosi} style={{color: 'var(--danger)'}} onChange={e => {}} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Codice Diagnosi (ICD-10)</label>
+                                <input type="text" className="form-input" value={patient.codiceDiagnosi} onChange={e => {}} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="card">
+                    <div className="card-header">
+                        <h3>👥 Figure di Riferimento</h3>
+                    </div>
+                    <div className="card-body">
+                        <div className="form-row-3">
+                            <div className="form-group">
+                                <label className="form-label">Coordinatore</label>
+                                <input type="text" className="form-input" value={patient.coordinatore} onChange={e => {}} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Assistente Sociale</label>
+                                <input type="text" className="form-input" value={patient.assistenteSociale} onChange={e => {}} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Operatore Compilatore</label>
+                                <input type="text" className="form-input" value="Beneventano Michele" onChange={e => {}} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
+
+        // Aree Tab
+        const AreeTab = ({ formData, setFormData }) => (
+            <>
+                <div className="info-box">
+                    <span className="info-box-icon">ℹ️</span>
+                    <span className="info-box-text">
+                        Compila i valori per ogni Area di Intervento. I valori devono corrispondere alla scala di Problematicità indicata.
+                    </span>
+                </div>
+
+                <div className="legenda">
+                    <div className="legenda-item"><div className="legenda-dot v0"></div> 0 - Assente/Rifiuto</div>
+                    <div className="legenda-item"><div className="legenda-dot v1"></div> 1 - Nessun Intervento</div>
+                    <div className="legenda-item"><div className="legenda-dot v2"></div> 2 - Intervento in Progettazione</div>
+                    <div className="legenda-item"><div className="legenda-dot v3"></div> 3 - Intervento in Corso</div>
+                    <div className="legenda-item"><div className="legenda-dot v4"></div> 4 - Intervento Concluso</div>
+                </div>
+
+                {areeIntervento.map((area, idx) => (
+                    <div key={area.id} className="area-card" style={{borderLeftColor: `hsl(${idx * 30}, 70%, 50%)`}}>
+                        <div className="area-header">
+                            <div className="area-title">Area {area.id}: {area.nome}</div>
+                            <span className="badge badge-gray">{area.codice || `Area ${area.id}`}</span>
+                        </div>
+                        <div className="area-grid">
+                            <div>
+                                <div className="area-grid-label">Problematicità</div>
+                                <select className="form-select">
+                                    <option>a) Motivazione</option>
+                                    <option>b) Capacità esecutive</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div className="area-grid-label">Valore</div>
+                                <select className="form-select">
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div className="area-grid-label">Interventi Previsti</div>
+                                <textarea className="form-textarea" style={{minHeight: 60}} placeholder="Descrivi gli interventi previsti per quest'area..."></textarea>
+                            </div>
+                            <div>
+                                <div className="area-grid-label">Strumenti</div>
+                                <div className="form-row" style={{gap: 8}}>
+                                    <select className="form-select" style={{fontSize: 12}}>
+                                        <option>BPRS-18</option>
+                                        <option>VADO-AR</option>
+                                        <option>CAN</option>
+                                    </select>
+                                    <input type="number" className="form-input" placeholder="Val." style={{width: 60}} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </>
+        );
+
+        // Obiettivi Tab
+        const ObiettiviTab = ({ formData, setFormData }) => (
+            <>
+                <div className="card">
+                    <div className="card-header">
+                        <h3>🎯 Progetto Terapeutico in Sintesi</h3>
+                    </div>
+                    <div className="card-body">
+                        <div className="info-box success">
+                            <span className="info-box-icon">📊</span>
+                            <span className="info-box-text">
+                                Riepilogo aree: Cura di sé (Motivazione: 0, Capacità: 0) • Cura ambiente (Motivazione: 0, Capacità: 0) • Compliance terapia: 1 • ...
+                            </span>
+                        </div>
+
+                        <div className="section-title">Obiettivi del PEI</div>
+                        
+                        <div className="form-group">
+                            <label className="form-label required">Obiettivo a Breve Termine</label>
+                            <textarea 
+                                className="form-textarea" 
+                                value={formData.obiettivoBreve}
+                                onChange={e => setFormData({...formData, obiettivoBreve: e.target.value})}
+                                placeholder="Descrivi l'obiettivo a breve termine..."
+                            />
+                            <div className="form-hint">Obiettivi raggiungibili entro 1-3 mesi</div>
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label required">Obiettivo a Medio Termine</label>
+                            <textarea 
+                                className="form-textarea" 
+                                value={formData.obiettivoMedio}
+                                onChange={e => setFormData({...formData, obiettivoMedio: e.target.value})}
+                                placeholder="Descrivi l'obiettivo a medio termine..."
+                            />
+                            <div className="form-hint">Obiettivi raggiungibili entro 3-6 mesi</div>
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label required">Obiettivo a Lungo Termine</label>
+                            <textarea 
+                                className="form-textarea" 
+                                value={formData.obiettivoLungo}
+                                onChange={e => setFormData({...formData, obiettivoLungo: e.target.value})}
+                                placeholder="Descrivi l'obiettivo a lungo termine..."
+                            />
+                            <div className="form-hint">Obiettivi raggiungibili entro 6-12 mesi</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="card">
+                    <div className="card-header">
+                        <h3>👥 Figure e Risorse</h3>
+                    </div>
+                    <div className="card-body">
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label className="form-label">Referente Principale</label>
+                                <input 
+                                    type="text" 
+                                    className="form-input" 
+                                    value={formData.referentePrincipale}
+                                    onChange={e => setFormData({...formData, referentePrincipale: e.target.value})}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Altre Figure di Riferimento</label>
+                                <input 
+                                    type="text" 
+                                    className="form-input" 
+                                    value={formData.figureRiferimento}
+                                    onChange={e => setFormData({...formData, figureRiferimento: e.target.value})}
+                                />
+                            </div>
+                        </div>
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label className="form-label">Tempi per Nuova Verifica</label>
+                                <select 
+                                    className="form-select"
+                                    value={formData.tempiVerifica}
+                                    onChange={e => setFormData({...formData, tempiVerifica: e.target.value})}
+                                >
+                                    <option>Mensile</option>
+                                    <option>Bimestrale</option>
+                                    <option>Trimestrale</option>
+                                    <option>Semestrale</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Risorse Previste per l'Intervento</label>
+                                <input 
+                                    type="text" 
+                                    className="form-input" 
+                                    value={formData.risorsePreviste}
+                                    onChange={e => setFormData({...formData, risorsePreviste: e.target.value})}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
+
+        // Verifiche Tab
+        const VerificheTab = ({ formData, setFormData }) => {
+            const trimestri = ['Q1', 'Q2', 'Q3', 'Q4'];
+            const trimestreLabels = ['I° Trimestre', 'II° Trimestre', 'III° Trimestre', 'IV° Trimestre'];
+
+            return (
+                <>
+                    <div className="info-box warning">
+                        <span className="info-box-icon">📅</span>
+                        <span className="info-box-text">
+                            Le verifiche trimestrali permettono di monitorare il raggiungimento degli obiettivi PEI. Inserisci un punteggio da 1 a 6 per ogni area.
+                        </span>
+                    </div>
+
+                    <div className="legenda">
+                        <div className="legenda-item"><strong>Legenda punteggi:</strong></div>
+                        <div className="legenda-item">1 = molto peggio del solito</div>
+                        <div className="legenda-item">2 = un po' peggio del solito</div>
+                        <div className="legenda-item">3 = come al solito</div>
+                        <div className="legenda-item">4 = un po' meglio del solito</div>
+                        <div className="legenda-item">5 = molto meglio del solito</div>
+                        <div className="legenda-item">6 = sconosciuto</div>
+                    </div>
+
+                    {trimestri.map((q, qIdx) => (
+                        <div key={q} className="card">
+                            <div className="card-header">
+                                <h3><Icons.Calendar /> {trimestreLabels[qIdx]} - {2025}</h3>
+                                <span className="badge badge-primary">Verifica del: __/__/2025</span>
+                            </div>
+                            <div className="card-body">
+                                <div className="verifica-grid">
+                                    {areeIntervento.map((area, idx) => (
+                                        <div key={idx} className="verifica-item">
+                                            <label className="verifica-label">Area {idx + 1}</label>
+                                            <input 
+                                                type="number" 
+                                                className="verifica-input" 
+                                                min="1" 
+                                                max="6" 
+                                                placeholder="-"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="form-row-3">
+                                    <div className="form-group">
+                                        <label className="form-label">Data Verifica</label>
+                                        <input type="date" className="form-input" />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">CGI Gravità della Malattia</label>
+                                        <select className="form-select">
+                                            <option value="">Seleziona...</option>
+                                            <option value="1">1 - Normale</option>
+                                            <option value="2">2 - Malattia minima</option>
+                                            <option value="3">3 - Malattia lieve</option>
+                                            <option value="4">4 - Malattia moderata</option>
+                                            <option value="5">5 - Malattia marcata</option>
+                                            <option value="6">6 - Malattia grave</option>
+                                            <option value="7">7 - Malattia molto grave</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Miglioramento Globale</label>
+                                        <select className="form-select">
+                                            <option value="">Seleziona...</option>
+                                            <option value="1">1 - Molto migliorato</option>
+                                            <option value="2">2 - Moderatamente migliorato</option>
+                                            <option value="3">3 - Minimamente migliorato</option>
+                                            <option value="4">4 - Nessun cambiamento</option>
+                                            <option value="5">5 - Minimamente peggiorato</option>
+                                            <option value="6">6 - Moderatamente peggiorato</option>
+                                            <option value="7">7 - Molto peggiorato</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="form-row-3" style={{marginTop: 8}}>
+                                    <div className="form-group">
+                                        <label className="form-label">Firma Coordinatore</label>
+                                        <input type="text" className="form-input" placeholder="Dr. Beneventano Michele" />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Firma Assistente Sociale</label>
+                                        <input type="text" className="form-input" placeholder="Dr.ssa Santina Maria" />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Firma Operatore</label>
+                                        <input type="text" className="form-input" placeholder="Beneventano Michele" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </>
+            );
+        };
+
+        // Strumenti Tab
+        const StrumentiTab = ({ formData, setFormData }) => (
+            <>
+                <div className="info-box">
+                    <span className="info-box-icon">📊</span>
+                    <span className="info-box-text">
+                        Seleziona e compila i valori degli strumenti di valutazione utilizzati. I grafici vengono generati automaticamente.
+                    </span>
+                </div>
+
+                <div className="card">
+                    <div className="card-header">
+                        <h3><Icons.BarChart /> Strumenti di Valutazione</h3>
+                        <button className="btn btn-sm btn-primary"><Icons.Plus /> Aggiungi Strumento</button>
+                    </div>
+                    <div className="card-body">
+                        <div className="strumenti-grid">
+                            {strumentiValutazione.map(strumento => (
+                                <div key={strumento.id} className="strumento-card">
+                                    <div className="strumento-icon">📋</div>
+                                    <div className="strumento-name">{strumento.nome}</div>
+                                    <div style={{fontSize: 10, color: 'var(--gray-500)'}}>{strumento.descrizione}</div>
+                                    <div className="strumento-value">{strumento.valore}</div>
+                                    <button className="btn btn-sm btn-outline" style={{marginTop: 8}}>Modifica</button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="card">
+                    <div className="card-header">
+                        <h3>📈 VADO - AR (Aree Riabilitative)</h3>
+                    </div>
+                    <div className="card-body">
+                        <table className="terapia-table">
+                            <thead>
+                                <tr>
+                                    <th>Area</th>
+                                    <th>2022</th>
+                                    <th>2023</th>
+                                    <th>2024</th>
+                                    <th>2025</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {['01. Cura di sé', '02. Cura abbigliamento', '03. Cura salute fisica', '04. Gestione salute psichica', '05. Abitazione', '06. Zona abitazione'].map((area, idx) => (
+                                    <tr key={idx}>
+                                        <td>{area}</td>
+                                        <td><input type="number" className="form-input" style={{width: 60, textAlign: 'center'}} defaultValue={idx + 1} /></td>
+                                        <td><input type="number" className="form-input" style={{width: 60, textAlign: 'center'}} defaultValue={idx + 1} /></td>
+                                        <td><input type="number" className="form-input" style={{width: 60, textAlign: 'center'}} defaultValue={idx + 2} /></td>
+                                        <td><input type="number" className="form-input" style={{width: 60, textAlign: 'center'}} defaultValue={idx + 2} /></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div className="card">
+                    <div className="card-header">
+                        <h3>📋 CAN (Camberwell Assessment of Need)</h3>
+                    </div>
+                    <div className="card-body">
+                        <table className="terapia-table">
+                            <thead>
+                                <tr>
+                                    <th>Area</th>
+                                    <th>2024</th>
+                                    <th>2025</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {['6. Salute Fisica', '7. Sintomi Psicotici', '13. Abuso di Farmaci', '12. Abuso di Alcool', '10. Sicurezza Personale'].map((area, idx) => (
+                                    <tr key={idx}>
+                                        <td>{area}</td>
+                                        <td><input type="number" className="form-input" style={{width: 60, textAlign: 'center'}} defaultValue={idx} /></td>
+                                        <td><input type="number" className="form-input" style={{width: 60, textAlign: 'center'}} defaultValue={idx} /></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        <div className="legenda" style={{marginTop: 12}}>
+                            <div className="legenda-item">0 = Nessun Problema</div>
+                            <div className="legenda-item">1 = Problema Ridotto</div>
+                            <div className="legenda-item">2 = Problema Serio</div>
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
+
+        // Terapia Tab
+        const TerapiaTab = ({ patient }) => (
+            <>
+                <div className="info-box warning">
+                    <span className="info-box-icon">💊</span>
+                    <span className="info-box-text">
+                        La terapia farmacologica viene gestita dalla sezione Farmaci & Parametri. Qui è visualizzata in sola lettura come riferimento per il PEI.
+                    </span>
+                </div>
+
+                <div className="card">
+                    <div className="card-header">
+                        <h3><Icons.Pill /> Trattamenti Farmacologici Attuali</h3>
+                        <a href="lucania-care-v3-clinical.html" className="btn btn-sm btn-primary">
+                            <Icons.ExternalLink /> Vai a Gestione Farmaci
+                        </a>
+                    </div>
+                    <div className="card-body">
+                        <table className="terapia-table">
+                            <thead>
+                                <tr>
+                                    <th>Ora</th>
+                                    <th>Farmaco</th>
+                                    <th>Dosaggio</th>
+                                    <th>Note</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {patient.terapia.map((t, idx) => (
+                                    <tr key={idx}>
+                                        <td><span className="badge badge-purple">{t.ora}</span></td>
+                                        <td style={{fontWeight: 500}}>{t.farmaco}</td>
+                                        <td>{t.dose}</td>
+                                        <td style={{color: 'var(--gray-400)'}}>-</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div className="card">
+                    <div className="card-header">
+                        <h3>💉 Terapia Long Acting</h3>
+                    </div>
+                    <div className="card-body">
+                        <div className="form-row-3">
+                            <div className="form-group">
+                                <label className="form-label">Farmaco</label>
+                                <input type="text" className="form-input" placeholder="Es. HALDOL 50mg (ogni 21 gg)" />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Dosaggio</label>
+                                <input type="text" className="form-input" placeholder="Es. 1 fiala IM" />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Frequenza</label>
+                                <select className="form-select">
+                                    <option>Ogni 21 giorni</option>
+                                    <option>Ogni 28 giorni</option>
+                                    <option>Ogni 7 giorni</option>
+                                    <option>Al bisogno</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="card">
+                    <div className="card-header">
+                        <h3>🆘 Terapia al Bisogno</h3>
+                    </div>
+                    <div className="card-body">
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label className="form-label">Farmaco</label>
+                                <input type="text" className="form-input" placeholder="Es. EN GOCCE" />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Dosaggio e Indicazioni</label>
+                                <input type="text" className="form-input" placeholder="Es. 10-20 gtt in caso di agitazione" />
+                            </div>
+                        </div>
+                        <button className="btn btn-sm btn-outline" style={{marginTop: 8}}><Icons.Plus /> Aggiungi Farmaco al Bisogno</button>
+                    </div>
+                </div>
+            </>
+        );
+
+        ReactDOM.render(<PEIEditorApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
